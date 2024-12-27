@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 // Enable request logging
 app.use((req, res, next) => {
@@ -83,20 +83,44 @@ try {
   process.exit(1);
 }
 
-// Serve static files from the Vue app build directory
+// Serve static files from the Vue app build directory with proper MIME types
 app.use(express.static(distPath, {
   maxAge: '1h',
   etag: true,
   lastModified: true,
   setHeaders: (res, path) => {
-    if (path.endsWith('.html')) {
+    // Set proper MIME types
+    if (path.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    } else if (path.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (path.endsWith('.html')) {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
       res.setHeader('Cache-Control', 'no-cache');
+    } else if (path.endsWith('.jpg') || path.endsWith('.jpeg')) {
+      res.setHeader('Content-Type', 'image/jpeg');
     }
+    
+    // Log served files
+    console.log(`Serving static file: ${path}`);
   }
 }));
 
-// Handle SPA routing
+// Add logging middleware for debugging
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url} - ${res.statusCode}`);
+  next();
+});
+
+// Handle SPA routing - this should be after static file serving
 app.get('*', (req, res) => {
+  // Don't serve index.html for asset requests
+  if (req.url.includes('/assets/')) {
+    res.status(404).send('Not found');
+    return;
+  }
+  
+  console.log('Serving index.html for path:', req.url);
   res.sendFile(join(distPath, 'index.html'), err => {
     if (err) {
       console.error('Error sending index.html:', err);

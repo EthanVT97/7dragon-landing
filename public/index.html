@@ -8,17 +8,8 @@
     <meta name="theme-color" content="#4B0082">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="icon" href="<%= BASE_URL %>18klogo.jpg">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
     <title>18KChat</title>
-    
-    <!-- Preload critical resources -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://xnujjoarvinvztccwrye.supabase.co">
-    
-    <!-- Load fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap" rel="stylesheet">
     
     <!-- Critical CSS -->
     <style>
@@ -29,15 +20,6 @@
         box-sizing: border-box;
       }
       
-      /* Font configuration */
-      @font-face {
-        font-family: 'Padauk';
-        font-style: normal;
-        font-weight: 400;
-        font-display: swap;
-        src: local('Padauk'), local('Arial');
-      }
-      
       html, body {
         height: 100%;
         width: 100%;
@@ -46,9 +28,9 @@
       }
       
       body {
-        font-family: 'Padauk', Arial, sans-serif;
-        background-color: #f5f5f5;
-        color: #333;
+        font-family: Arial, sans-serif;
+        background-color: #0f1c2c;
+        color: #e0e7ff;
         line-height: 1.6;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
@@ -62,25 +44,127 @@
       /* Loading state */
       .app-loading {
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         height: 100vh;
         width: 100vw;
-        background-color: #f5f5f5;
+        background: linear-gradient(135deg, #0f1c2c 0%, #1a2a3d 100%);
       }
       
-      /* Noscript message styling */
-      noscript {
-        display: block;
-        margin: 20px;
+      /* Loading logo */
+      .loading-logo {
+        width: 80px;
+        height: 80px;
+        background: #52d7b7;
+        border-radius: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 20px;
+        animation: pulse 1.5s ease-in-out infinite;
+        box-shadow: 0 4px 15px rgba(82, 215, 183, 0.3);
+      }
+      
+      .loading-logo span {
+        font-size: 40px;
+        color: #fff;
+      }
+      
+      /* Loading text */
+      .loading-text {
+        color: #e0e7ff;
+        font-size: 18px;
+        text-align: center;
+        opacity: 0.9;
+      }
+      
+      /* Loading spinner */
+      .loading-spinner {
+        margin-top: 15px;
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(82, 215, 183, 0.1);
+        border-radius: 50%;
+        border-top-color: #52d7b7;
+        animation: spin 1s linear infinite;
+      }
+      
+      /* Error message styling */
+      .app-error {
+        display: none;
+        color: #721c24;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
         padding: 20px;
-        background-color: #fff3cd;
-        border: 1px solid #ffeeba;
-        color: #856404;
+        margin: 20px;
         border-radius: 4px;
         text-align: center;
       }
+
+      /* Debug info styling */
+      .debug-info {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 10px;
+        font-family: monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+        z-index: 9999;
+      }
+
+      @keyframes pulse {
+        0% { transform: scale(1); opacity: 0.8; }
+        50% { transform: scale(1.05); opacity: 1; }
+        100% { transform: scale(1); opacity: 0.8; }
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
     </style>
+
+    <!-- Error handling script -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Create debug info element
+        var debugInfo = document.createElement('div');
+        debugInfo.className = 'debug-info';
+        document.body.appendChild(debugInfo);
+
+        // Error handling
+        window.onerror = function(msg, url, line, col, error) {
+          console.error('Error:', msg, '\nURL:', url, '\nLine:', line, '\nColumn:', col, '\nError:', error);
+          var errorEl = document.querySelector('.app-error');
+          if (errorEl) errorEl.style.display = 'block';
+          
+          // Show debug info
+          debugInfo.style.display = 'block';
+          debugInfo.textContent = `Error: ${msg}\nURL: ${url}\nLine: ${line}\nColumn: ${col}\nStack: ${error && error.stack}`;
+          
+          return false;
+        };
+
+        // Resource loading error handling
+        window.addEventListener('error', function(e) {
+          if (e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK') {
+            console.error('Resource loading error:', e.target.src || e.target.href);
+            debugInfo.textContent += '\nFailed to load: ' + (e.target.src || e.target.href);
+          }
+        }, true);
+      });
+
+      // Provide a mock process.env for dotenv
+      window.process = { env: {} };
+    </script>
+
+    <!-- Load fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap" rel="stylesheet">
   </head>
   <body>
     <noscript>
@@ -89,7 +173,15 @@
     <div id="app">
       <!-- Loading state -->
       <div class="app-loading">
-        <img src="<%= BASE_URL %>18klogo.jpg" alt="18K Chat Loading" width="64" height="64">
+        <div class="loading-logo">
+          <span>18K</span>
+        </div>
+        <div class="loading-text">Loading 18K Chat...</div>
+        <div class="loading-spinner"></div>
+      </div>
+      <!-- Error message -->
+      <div class="app-error">
+        <strong>Sorry, something went wrong while loading the application. Please try refreshing the page.</strong>
       </div>
     </div>
     <!-- built files will be auto injected -->

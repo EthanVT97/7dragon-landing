@@ -41,8 +41,6 @@
     "image-webpack-loader": "^8.1.0",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
-    "sass": "^1.69.5",
-    "sass-loader": "^13.3.2",
     "socket.io-client": "^4.7.2",
     "url-loader": "^4.1.1",
     "vue": "^3.3.13",
@@ -56,6 +54,8 @@
     "node": ">=18.0.0"
   },
   "devDependencies": {
+    "sass": "^1.83.0",
+    "sass-loader": "^13.3.3",
     "terser-webpack-plugin": "^5.3.11"
   }
 }

@@ -3,6 +3,7 @@ import CompressionPlugin from 'compression-webpack-plugin'
 import TerserPlugin from 'terser-webpack-plugin'
 import { fileURLToPath } from 'url'
 import { dirname } from 'path'
+import sass from 'sass'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -17,7 +18,11 @@ export default defineConfig({
     extract: true,
     sourceMap: false,
     loaderOptions: {
-      scss: {
+      sass: {
+        implementation: sass,
+        sassOptions: {
+          indentedSyntax: false
+        },
         additionalData: `@use "@/assets/styles/_variables" as *;`
       }
     }
@@ -75,6 +80,20 @@ export default defineConfig({
         minRatio: 0.8
       }])
     }
+
+    // Configure SASS loader
+    config.module
+      .rule('scss')
+      .test(/\.scss$/)
+      .use('sass-loader')
+      .loader('sass-loader')
+      .options({
+        implementation: sass,
+        sassOptions: {
+          indentedSyntax: false
+        }
+      })
+      .end()
 
     // Optimize images
     config.module
