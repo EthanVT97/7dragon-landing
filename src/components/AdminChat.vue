@@ -159,7 +159,6 @@ export default {
     
     // Computed
     const isConnected = computed(() => store.state.isConnected)
-    const currentUser = computed(() => store.getters.currentUser)
     
     const filteredUsers = computed(() => {
       if (!searchQuery.value) return users.value
