@@ -1,46 +1,23 @@
 <template>
-  <div class="about">
-    <h1>About 18K Chat</h1>
-    <div class="content">
-      <div class="mission">
-        <h2>Our Mission</h2>
-        <p>To provide businesses with intelligent, multilingual customer service solutions that enhance customer experience and streamline support operations.</p>
+  <div class="about-page">
+    <div class="about-content">
+      <h1>About 18K Chat</h1>
+      <div class="description">
+        <p>Welcome to 18K Chat, your premier destination for intelligent conversations and seamless communication.</p>
+        <p>Our platform leverages cutting-edge AI technology to provide you with a unique and engaging chat experience.</p>
       </div>
-      <div class="values">
-        <h2>Our Values</h2>
-        <div class="values-grid">
-          <div class="value">
-            <h3>Innovation</h3>
-            <p>Constantly improving our AI and chat solutions</p>
-          </div>
-          <div class="value">
-            <h3>Reliability</h3>
-            <p>24/7 uptime and consistent performance</p>
-          </div>
-          <div class="value">
-            <h3>Security</h3>
-            <p>Enterprise-grade data protection</p>
-          </div>
-          <div class="value">
-            <h3>Support</h3>
-            <p>Dedicated customer success team</p>
-          </div>
-        </div>
+      <div class="features">
+        <h2>Key Features</h2>
+        <ul>
+          <li>Real-time AI-powered conversations</li>
+          <li>Secure and private messaging</li>
+          <li>Intuitive user interface</li>
+          <li>24/7 availability</li>
+        </ul>
       </div>
-      <div class="team">
-        <h2>Our Team</h2>
-        <div class="team-grid">
-          <div class="member">
-            <img src="@/assets/18kchatlogo.jpg" alt="Team Member" class="avatar">
-            <h3>John Doe</h3>
-            <p>CEO & Founder</p>
-          </div>
-          <div class="member">
-            <img src="@/assets/18kchatlogo.jpg" alt="Team Member" class="avatar">
-            <h3>Jane Smith</h3>
-            <p>CTO</p>
-          </div>
-        </div>
+      <div class="version-info">
+        <p>Version: 1.0.0</p>
+        <p> 2024 18K Chat. All rights reserved.</p>
       </div>
     </div>
   </div>
@@ -53,85 +30,73 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.about {
-  padding: $spacing-xl;
-
-  h1 {
-    text-align: center;
-    margin-bottom: $spacing-xl;
-  }
-}
-
-.content {
-  max-width: 1200px;
-  margin: 0 auto;
-
-  > div {
-    margin-bottom: $spacing-xl;
-  }
-}
-
-.mission {
-  text-align: center;
-  max-width: 800px;
-  margin: 0 auto $spacing-xl;
-
-  p {
-    font-size: $font-size-lg;
-  }
-}
-
-.values-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: $spacing-lg;
-
-  @media (max-width: $tablet) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (max-width: $mobile) {
-    grid-template-columns: 1fr;
-  }
-}
-
-.value {
-  padding: $spacing-lg;
-  background: rgba($primary, 0.1);
-  border-radius: $border-radius-md;
-  text-align: center;
-
-  h3 {
-    color: $accent;
-    margin-bottom: $spacing-sm;
-  }
-}
-
-.team-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: $spacing-xl;
+.about-page {
+  padding: 2rem;
   max-width: 800px;
   margin: 0 auto;
 
-  @media (max-width: $mobile) {
-    grid-template-columns: 1fr;
-  }
-}
+  .about-content {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
-.member {
-  text-align: center;
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
 
-  .avatar {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    margin-bottom: $spacing-md;
-  }
+    .description {
+      margin-bottom: 2rem;
+      
+      p {
+        margin-bottom: 1rem;
+        line-height: 1.6;
+        color: #34495e;
+      }
+    }
 
-  h3 {
-    color: $accent;
-    margin-bottom: $spacing-sm;
+    .features {
+      margin-bottom: 2rem;
+
+      h2 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+      }
+
+      ul {
+        list-style-type: none;
+        padding: 0;
+
+        li {
+          margin-bottom: 0.5rem;
+          padding-left: 1.5rem;
+          position: relative;
+          color: #34495e;
+
+          &:before {
+            content: "•";
+            color: #3498db;
+            position: absolute;
+            left: 0;
+          }
+        }
+      }
+    }
+
+    .version-info {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid #eee;
+      color: #7f8c8d;
+
+      p {
+        margin: 0.5rem 0;
+        font-size: 0.9rem;
+      }
+    }
   }
 }
 </style>
