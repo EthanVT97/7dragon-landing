@@ -2,6 +2,7 @@
   "name": "7dragon-chat-master",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "serve": "vue-cli-service serve",
     "dev": "vue-cli-service serve",
