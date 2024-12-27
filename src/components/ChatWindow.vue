@@ -13,15 +13,44 @@
 
     <div class="chat-messages" ref="messagesContainer">
       <div 
-        v-for="(message, index) in messages" 
-        :key="index"
-        :class="['message', message.isFromUser ? 'user-message' : 'bot-message']"
+        v-for="message in messages" 
+        :key="message.id"
+        :class="['message', message.user_id ? 'user-message' : 'bot-message']"
       >
-        <div class="message-content">
-          <p>{{ message.content }}</p>
-          <span class="message-time">{{ formatTime(message.timestamp) }}</span>
+        <div class="message-content" :class="message.message_type">
+          <!-- Text Message -->
+          <p v-if="message.message_type === 'text'">{{ message.content }}</p>
+
+          <!-- Image Message -->
+          <div v-else-if="message.message_type === 'image'" class="image-container">
+            <img 
+              :src="message.image_url" 
+              :alt="message.file_name || 'Chat image'"
+              @click="openImagePreview(message.image_url)"
+              loading="lazy"
+            >
+            <p v-if="message.content" class="image-caption">{{ message.content }}</p>
+          </div>
+
+          <!-- File Message -->
+          <div v-else-if="message.message_type === 'file'" class="file-container">
+            <a :href="message.file_url" target="_blank" class="file-download">
+              <i class="fas fa-file"></i>
+              <span>{{ message.file_name }}</span>
+              <small>{{ formatFileSize(message.file_size) }}</small>
+            </a>
+          </div>
+
+          <!-- Error Message -->
+          <div v-else-if="message.message_type === 'error'" class="error-message">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>{{ message.error_message }}</span>
+          </div>
+
+          <span class="message-time">{{ formatTime(message.created_at) }}</span>
         </div>
       </div>
+
       <div v-if="isTyping" class="message bot-message typing">
         <div class="typing-indicator">
           <span></span>
@@ -31,53 +60,67 @@
       </div>
     </div>
 
-    <div class="chat-input">
-      <textarea
-        v-model="newMessage"
-        :placeholder="$t('chat.placeholder')"
-        @keydown.enter.prevent="sendMessage"
-        rows="1"
-        ref="messageInput"
-      ></textarea>
-      <button 
-        @click="sendMessage"
-        :disabled="!newMessage.trim() || !isConnected"
-        class="send-button"
-      >
-        <i class="fas fa-paper-plane"></i>
-      </button>
-    </div>
+    <ChatInput 
+      :session-id="sessionId"
+      :is-connected="isConnected"
+      @message-sent="handleMessageSent"
+    />
   </div>
 </template>
 
 <script>
-import { ref, onMounted, watch, nextTick, computed } from 'vue'
+import { ref, onMounted, watch, nextTick } from 'vue'
 import { useStore } from 'vuex'
-import { useI18n } from 'vue-i18n'
+import ChatInput from './ChatInput.vue'
+import { formatDistanceToNow } from 'date-fns'
 
 export default {
   name: 'ChatWindow',
-  setup() {
+  components: {
+    ChatInput
+  },
+
+  props: {
+    sessionId: {
+      type: String,
+      required: true
+    }
+  },
+
+  setup(props) {
     const store = useStore()
-    const { t } = useI18n()
-    
-    const newMessage = ref('')
-    const isTyping = ref(false)
     const messagesContainer = ref(null)
-    const messageInput = ref(null)
-    
-    const messages = computed(() => store.getters.messageHistory)
-    const isConnected = computed(() => store.state.isConnected)
-    
-    // Auto-resize textarea
-    const adjustTextareaHeight = () => {
-      const textarea = messageInput.value
-      if (textarea) {
-        textarea.style.height = 'auto'
-        textarea.style.height = textarea.scrollHeight + 'px'
+    const messages = ref([])
+    const isConnected = ref(false)
+    const isTyping = ref(false)
+    const imagePreviewUrl = ref(null)
+
+    // Load messages
+    const loadMessages = async () => {
+      try {
+        const { data, error } = await store.dispatch('loadChatMessages', props.sessionId)
+        if (error) throw error
+        messages.value = data
+        scrollToBottom()
+      } catch (err) {
+        console.error('Error loading messages:', err)
       }
     }
-    
+
+    // Format timestamp
+    const formatTime = (timestamp) => {
+      if (!timestamp) return ''
+      return formatDistanceToNow(new Date(timestamp), { addSuffix: true })
+    }
+
+    // Format file size
+    const formatFileSize = (bytes) => {
+      if (!bytes) return '0 B'
+      const sizes = ['B', 'KB', 'MB', 'GB']
+      const i = Math.floor(Math.log(bytes) / Math.log(1024))
+      return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`
+    }
+
     // Scroll to bottom of messages
     const scrollToBottom = async () => {
       await nextTick()
@@ -85,82 +128,44 @@ export default {
         messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
       }
     }
-    
-    // Format timestamp
-    const formatTime = (timestamp) => {
-      return new Date(timestamp).toLocaleTimeString([], { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-      })
-    }
-    
-    // Send message
-    const sendMessage = async () => {
-      const content = newMessage.value.trim()
-      if (!content || !isConnected.value) return
-      
-      newMessage.value = ''
-      adjustTextareaHeight()
-      
-      const { error } = await store.dispatch('sendMessage', content)
-      if (error) {
-        // Handle error
-        console.error('Failed to send message:', error)
-        return
-      }
-      
-      // Simulate bot typing
-      isTyping.value = true
-      setTimeout(() => {
-        isTyping.value = false
-        // Add bot response
-        store.commit('ADD_MESSAGE', {
-          content: t('chat.autoResponse'),
-          timestamp: new Date(),
-          isFromUser: false
-        })
-        scrollToBottom()
-      }, 2000)
-      
+
+    // Handle new message
+    const handleMessageSent = (message) => {
+      messages.value.push(message)
       scrollToBottom()
     }
-    
+
+    // Image preview
+    const openImagePreview = (url) => {
+      imagePreviewUrl.value = url
+      // Implement image preview modal/lightbox here
+    }
+
     // Watch for new messages
-    watch(messages, () => {
+    watch(() => store.state.chat.messages, (newMessages) => {
+      messages.value = newMessages
       scrollToBottom()
     })
-    
-    // Watch for textarea content changes
-    watch(newMessage, () => {
-      adjustTextareaHeight()
+
+    // Watch connection status
+    watch(() => store.state.chat.isConnected, (newStatus) => {
+      isConnected.value = newStatus
     })
-    
+
     onMounted(() => {
-      // Add welcome message
-      if (messages.value.length === 0) {
-        store.commit('ADD_MESSAGE', {
-          content: t('chat.welcome'),
-          timestamp: new Date(),
-          isFromUser: false
-        })
-      }
-      
-      // Focus input
-      messageInput.value?.focus()
-      
-      // Connect to chat service
-      store.dispatch('setConnectionStatus', true)
+      loadMessages()
+      isConnected.value = true // Set this based on your actual connection status
     })
-    
+
     return {
-      newMessage,
-      isTyping,
       messages,
       isConnected,
+      isTyping,
       messagesContainer,
-      messageInput,
-      sendMessage,
-      formatTime
+      formatTime,
+      formatFileSize,
+      handleMessageSent,
+      openImagePreview
     }
   }
 }
@@ -170,191 +175,165 @@ export default {
 .chat-window {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  background: linear-gradient(135deg, #0f1c2c 0%, #1a2a3d 100%);
-  color: #e0e7ff;
-}
-
-.chat-header {
-  padding: 1rem;
-  background: rgba(26, 42, 61, 0.9);
-  border-bottom: 1px solid rgba(82, 215, 183, 0.3);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
-
-.chat-title {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-
-  .chat-logo {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid #52d7b7;
-  }
-
-  h3 {
-    color: #52d7b7;
-    margin: 0;
-    font-size: 1.5rem;
-  }
-}
-
-.chat-status {
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  background: rgba(82, 215, 183, 0.1);
-  border: 1px solid rgba(82, 215, 183, 0.3);
-  
-  &.connected {
-    background: rgba(82, 215, 183, 0.2);
-    color: #52d7b7;
-  }
-}
-
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: rgba(26, 42, 61, 0.9);
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: #52d7b7;
-    border-radius: 3px;
-  }
-}
-
-.message {
-  max-width: 80%;
-  padding: 1rem;
+  height: 100%;
+  background: var(--bg-color);
   border-radius: 12px;
-  position: relative;
-  animation: fadeIn 0.3s ease-out;
-  
-  &.user-message {
-    align-self: flex-end;
-    background: linear-gradient(135deg, #52d7b7 0%, #3eaf7c 100%);
-    color: #fff;
-    
-    .message-time {
-      color: rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+
+  .chat-header {
+    padding: 1rem;
+    background: var(--primary-color);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .chat-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .chat-logo {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+      }
+    }
+
+    .chat-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      opacity: 0.8;
+
+      &.connected {
+        opacity: 1;
+      }
     }
   }
-  
-  &.bot-message {
-    align-self: flex-start;
-    background: rgba(26, 42, 61, 0.9);
-    border: 1px solid rgba(82, 215, 183, 0.3);
-    
-    .message-time {
-      color: rgba(224, 231, 255, 0.6);
-    }
-  }
-}
 
-.message-content {
-  p {
-    margin: 0 0 0.5rem 0;
-    line-height: 1.5;
-  }
-}
-
-.message-time {
-  font-size: 0.8rem;
-  opacity: 0.8;
-}
-
-.chat-input {
-  padding: 1rem;
-  background: rgba(26, 42, 61, 0.9);
-  border-top: 1px solid rgba(82, 215, 183, 0.3);
-  display: flex;
-  gap: 1rem;
-  align-items: flex-end;
-  
-  textarea {
+  .chat-messages {
     flex: 1;
-    padding: 0.8rem;
-    border-radius: 8px;
-    border: 1px solid rgba(82, 215, 183, 0.3);
-    background: rgba(15, 28, 44, 0.8);
-    color: #e0e7ff;
-    resize: none;
-    min-height: 20px;
-    max-height: 150px;
-    transition: all 0.3s ease;
-    
-    &:focus {
-      outline: none;
-      border-color: #52d7b7;
-      background: rgba(15, 28, 44, 0.95);
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    .message {
+      display: flex;
+      margin-bottom: 1rem;
+
+      &.user-message {
+        justify-content: flex-end;
+
+        .message-content {
+          background: var(--primary-color);
+          color: white;
+          border-radius: 12px 12px 0 12px;
+        }
+      }
+
+      &.bot-message {
+        justify-content: flex-start;
+
+        .message-content {
+          background: var(--message-bg);
+          border-radius: 12px 12px 12px 0;
+        }
+      }
+
+      .message-content {
+        max-width: 70%;
+        padding: 0.75rem 1rem;
+        position: relative;
+
+        &.image {
+          padding: 0.5rem;
+          background: var(--bg-color);
+          border: 1px solid var(--border-color);
+        }
+
+        p {
+          margin: 0;
+          word-break: break-word;
+        }
+
+        .message-time {
+          font-size: 0.75rem;
+          opacity: 0.7;
+          margin-top: 0.25rem;
+          display: block;
+        }
+
+        .image-container {
+          img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+
+            &:hover {
+              transform: scale(1.02);
+            }
+          }
+
+          .image-caption {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+          }
+        }
+
+        .file-container {
+          .file-download {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: inherit;
+            text-decoration: none;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+            transition: background 0.2s;
+
+            &:hover {
+              background: rgba(0, 0, 0, 0.1);
+            }
+
+            small {
+              opacity: 0.7;
+            }
+          }
+        }
+      }
     }
-    
-    &::placeholder {
-      color: rgba(224, 231, 255, 0.5);
+
+    .typing {
+      .typing-indicator {
+        display: flex;
+        gap: 0.25rem;
+        padding: 0.5rem;
+
+        span {
+          width: 8px;
+          height: 8px;
+          background: var(--text-color);
+          border-radius: 50%;
+          animation: typing 1s infinite;
+
+          &:nth-child(2) { animation-delay: 0.2s; }
+          &:nth-child(3) { animation-delay: 0.4s; }
+        }
+      }
     }
   }
 }
 
-.send-button {
-  padding: 0.8rem 1.2rem;
-  border-radius: 8px;
-  border: none;
-  background: linear-gradient(135deg, #52d7b7 0%, #3eaf7c 100%);
-  color: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(82, 215, 183, 0.3);
-  }
-  
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
-
-.typing-indicator {
-  display: flex;
-  gap: 0.3rem;
-  padding: 1rem;
-  
-  span {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #52d7b7;
-    animation: bounce 1.4s infinite ease-in-out;
-    
-    &:nth-child(1) { animation-delay: -0.32s; }
-    &:nth-child(2) { animation-delay: -0.16s; }
-  }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes bounce {
-  0%, 80%, 100% { transform: scale(0); }
-  40% { transform: scale(1); }
+@keyframes typing {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
 }
 </style>
