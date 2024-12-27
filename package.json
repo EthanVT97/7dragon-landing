@@ -23,6 +23,7 @@
     "compression": "^1.7.5",
     "core-js": "^3.34.0",
     "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
     "dialogflow": "^1.2.0",
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.19.2",
