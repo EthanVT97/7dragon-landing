@@ -366,7 +366,7 @@ export default createStore({
       }
     },
 
-    async uploadFiles({ state }, files) {
+    async uploadFiles({ }, files) {
       const uploadedFiles = []
       for (const file of files) {
         try {

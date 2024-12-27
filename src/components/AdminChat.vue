@@ -1,4 +1,4 @@
-&lt;template>
+<template>
   <div class="admin-chat">
     <div class="sidebar">
       <div class="search-bar">
@@ -134,9 +134,9 @@
       </div>
     </div>
   </div>
-&lt;/template>
+</template>
 
-&lt;script>
+<script>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { supabase } from '@/supabase'
@@ -363,9 +363,9 @@ export default {
     }
   }
 }
-&lt;/script>
+</script>
 
-&lt;style lang="scss" scoped>
+<style lang="scss" scoped>
 .admin-chat {
   display: flex;
   height: 100vh;
@@ -697,4 +697,4 @@ export default {
     }
   }
 }
-&lt;/style>
+</style>
