@@ -12,7 +12,9 @@ export default createStore({
     currentLanguage: 'my',
     messages: [],
     isConnected: false,
-    unreadMessages: 0
+    unreadMessages: 0,
+    typingUsers: new Set(),
+    selectedFiles: []
   },
   mutations: {
     SET_USER(state, user) {
@@ -51,6 +53,31 @@ export default createStore({
           state.messages[messageIndex].id = id
         }
       }
+    },
+    SET_TYPING_STATUS(state, { userId, isTyping }) {
+      if (isTyping) {
+        state.typingUsers.add(userId)
+      } else {
+        state.typingUsers.delete(userId)
+      }
+    },
+    ADD_REACTION(state, { messageId, reaction, userId }) {
+      const message = state.messages.find(m => m.id === messageId)
+      if (message) {
+        if (!message.reactions) message.reactions = []
+        message.reactions.push({ reaction, user_id: userId })
+      }
+    },
+    REMOVE_REACTION(state, { messageId, reaction, userId }) {
+      const message = state.messages.find(m => m.id === messageId)
+      if (message && message.reactions) {
+        message.reactions = message.reactions.filter(r => 
+          !(r.user_id === userId && r.reaction === reaction)
+        )
+      }
+    },
+    SET_SELECTED_FILES(state, files) {
+      state.selectedFiles = files
     }
   },
   actions: {
@@ -292,6 +319,99 @@ export default createStore({
           })
         }
         return { error }
+      }
+    },
+    
+    async updateTypingStatus({ commit, state }, isTyping) {
+      try {
+        if (!state.user) return
+
+        const { error } = await supabase
+          .from('typing_indicators')
+          .upsert({
+            user_id: state.user.id,
+            last_typed: new Date().toISOString()
+          })
+
+        if (error) throw error
+
+        commit('SET_TYPING_STATUS', {
+          userId: state.user.id,
+          isTyping
+        })
+      } catch (error) {
+        console.error('Failed to update typing status:', error)
+      }
+    },
+
+    async addReaction({ commit, state }, { messageId, reaction }) {
+      try {
+        const { error } = await supabase
+          .from('message_reactions')
+          .insert({
+            message_id: messageId,
+            user_id: state.user.id,
+            reaction
+          })
+
+        if (error) throw error
+
+        commit('ADD_REACTION', {
+          messageId,
+          reaction,
+          userId: state.user.id
+        })
+      } catch (error) {
+        console.error('Failed to add reaction:', error)
+      }
+    },
+
+    async uploadFiles({ state }, files) {
+      const uploadedFiles = []
+      for (const file of files) {
+        try {
+          const fileName = `${Date.now()}-${file.name}`
+          const { data, error } = await supabase.storage
+            .from('chat-attachments')
+            .upload(fileName, file)
+
+          if (error) throw error
+
+          if (data) {
+            uploadedFiles.push({
+              file_name: file.name,
+              file_type: file.type,
+              file_size: file.size,
+              file_path: data.path
+            })
+          }
+        } catch (error) {
+          console.error('Failed to upload file:', error)
+        }
+      }
+      return uploadedFiles
+    },
+    
+    async removeReaction({ commit, state }, { messageId, reaction }) {
+      try {
+        const { error } = await supabase
+          .from('message_reactions')
+          .delete()
+          .match({
+            message_id: messageId,
+            user_id: state.user.id,
+            reaction
+          })
+
+        if (error) throw error
+
+        commit('REMOVE_REACTION', {
+          messageId,
+          reaction,
+          userId: state.user.id
+        })
+      } catch (error) {
+        console.error('Failed to remove reaction:', error)
       }
     },
     

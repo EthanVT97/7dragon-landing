@@ -13,6 +13,7 @@ import AdminAnalytics from '@/views/admin/Analytics.vue'
 import AdminUsers from '@/views/admin/Users.vue'
 import AdminSetup from '@/views/AdminSetup.vue'
 import NotFound from '@/views/NotFound.vue'
+import AdminChat from '@/components/AdminChat.vue'
 
 const routes = [
   {
@@ -69,6 +70,15 @@ const routes = [
     ]
   },
   {
+    path: '/admin/chat',
+    name: 'AdminChat',
+    component: AdminChat,
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true
+    }
+  },
+  {
     path: '/admin-setup',
     name: 'AdminSetup',
     component: AdminSetup
@@ -96,40 +106,18 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const store = useStore()
   const isAuthenticated = store.getters.isAuthenticated
-  const user = store.getters.currentUser
-  
-  // Check if route requires authentication
+  const isAdmin = store.getters.currentUser?.role === 'admin'
+
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!isAuthenticated) {
-      // Redirect to login page if not authenticated
-      next({
-        path: '/login',
-        query: { redirect: to.fullPath }
-      })
-    } else if (to.matched.some(record => record.meta.adminOnly)) {
-      // Check if user has admin role
-      if (!user || user.role !== 'admin') {
-        console.warn('Access denied: Admin role required')
-        next({ 
-          path: '/',
-          query: { 
-            error: 'access_denied',
-            message: 'Admin access required'
-          }
-        })
-      } else {
-        next()
-      }
+      next('/login')
+    } else if (to.matched.some(record => record.meta.requiresAdmin) && !isAdmin) {
+      next('/')
     } else {
       next()
     }
   } else {
-    // If trying to access login page while already authenticated
-    if (isAuthenticated && to.path === '/login') {
-      next({ path: '/admin/dashboard' })
-    } else {
-      next()
-    }
+    next()
   }
 })
 
