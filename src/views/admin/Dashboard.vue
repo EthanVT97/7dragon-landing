@@ -85,30 +85,33 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dashboard {
-  padding: $spacing-xl;
-
-  h1 {
-    margin-bottom: $spacing-xl;
-  }
-}
-
 .admin-nav {
   display: flex;
   justify-content: space-between;
-  margin-bottom: $spacing-lg;
+  margin-bottom: 2rem;
 
   .nav-item {
-    margin-right: $spacing-md;
+    margin-right: 1rem;
     text-decoration: none;
-    color: $text-color;
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
 
     &:hover {
-      color: $accent;
+      color: var(--color-secondary);
+      background: rgba(82, 215, 183, 0.1);
+    }
+
+    &.router-link-active {
+      color: var(--color-secondary);
+      background: rgba(82, 215, 183, 0.15);
     }
 
     i {
-      margin-right: $spacing-xs;
+      margin-right: 0.5rem;
     }
   }
 }
@@ -116,54 +119,69 @@ export default {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: $spacing-lg;
-  margin-bottom: $spacing-xl;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 
-  @media (max-width: $tablet) {
+  @media (max-width: 1200px) {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  @media (max-width: $mobile) {
+  @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
 }
 
 .stat-card {
-  padding: $spacing-lg;
-  background: rgba($primary, 0.1);
-  border-radius: $border-radius-md;
+  background: rgba(26, 42, 61, 0.9);
+  border: 1px solid rgba(82, 215, 183, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem;
   text-align: center;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(82, 215, 183, 0.2);
+  }
 
   h3 {
-    color: $accent;
-    margin-bottom: $spacing-md;
+    color: var(--color-text);
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    opacity: 0.8;
   }
 
   .value {
-    font-size: $font-size-xl;
+    color: var(--color-secondary);
+    font-size: 2rem;
     font-weight: bold;
   }
 }
 
-.charts {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: $spacing-xl;
-  margin-top: $spacing-xl;
+.dashboard {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 
-  @media (max-width: $tablet) {
-    grid-template-columns: 1fr;
+  h1 {
+    color: var(--color-text);
+    margin: 0 0 2rem 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 1rem;
   }
 
-  .chart {
-    padding: $spacing-lg;
-    background: rgba($primary, 0.1);
-    border-radius: $border-radius-md;
+  .admin-nav {
+    flex-wrap: wrap;
+    gap: 0.5rem;
 
-    h3 {
-      color: $accent;
-      margin-bottom: $spacing-lg;
-      text-align: center;
+    .nav-item {
+      margin-right: 0;
+      width: calc(50% - 0.25rem);
+      justify-content: center;
     }
   }
 }
