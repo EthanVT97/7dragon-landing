@@ -7,13 +7,39 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: VITE_SUPABASE_URL
+      - key: VUE_APP_SUPABASE_URL
         value: https://xnujjoarvinvztccwrye.supabase.co
-      - key: VITE_SUPABASE_ANON_KEY
+      - key: VUE_APP_SUPABASE_KEY
         value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhudWpqb2Fydmludnp0Y2N3cnllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUyNzc1OTAsImV4cCI6MjA1MDg1MzU5MH0.pyxlMZkDM53RWaPHc4GhsoKdaGDqbkn2p7b1cXF3Wgs
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhudWpqb2Fydmludnp0Y2N3cnllIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNTI3NzU5MCwiZXhwIjoyMDUwODUzNTkwfQ.05VwSiLqDWmOeT7akK-T0JrG65VIYz3doTurOYtjxgs
       - key: NODE_VERSION
         value: 18.0.0
       - key: PORT
         value: 3000
-    healthCheckPath: /
+      - key: ADMIN_EMAIL
+        value: admin@18kchat.com
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_USERNAME
+        value: Admin
+      - key: ADMIN_NICKNAME
+        value: System Admin
+    healthCheckPath: /health
     autoDeploy: true
+    buildFilter:
+      paths:
+        - src/**
+        - public/**
+        - package.json
+        - package-lock.json
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin

@@ -15,25 +15,33 @@ const port = process.env.PORT || 3000;
 // Trust proxy for Render deployment
 app.set('trust proxy', 1);
 
-// Security middleware
+// Security middleware with updated CSP
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      connectSrc: ["'self'", 
+      connectSrc: [
+        "'self'", 
         "https://xnujjoarvinvztccwrye.supabase.co", 
         "wss://xnujjoarvinvztccwrye.supabase.co",
+        "https://*.supabase.co",
+        "wss://*.supabase.co",
         "https://fonts.googleapis.com",
         "https://fonts.gstatic.com"
       ],
-      imgSrc: ["'self'", "data:", "https:"],
+      imgSrc: ["'self'", "data:", "https:", "blob:"],
       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       styleSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+      mediaSrc: ["'self'", "blob:", "data:"],
+      workerSrc: ["'self'", "blob:"],
+      frameSrc: ["'self'"],
       upgradeInsecureRequests: null
     },
   },
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
 // Rate limiting
@@ -45,18 +53,38 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Enable CORS
-app.use(cors());
+// Enable CORS with WebSocket support
+app.use(cors({
+  origin: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 
 // Compression
 app.use(compression());
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy' });
+});
+
 // Serve static files from the Vue app build directory
-app.use(express.static(path.join(__dirname, 'dist')));
+app.use(express.static(path.join(__dirname, 'dist'), {
+  maxAge: '1h',
+  etag: true,
+  lastModified: true
+}));
 
 // Handle SPA routing
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something went wrong!' });
 });
 
 app.listen(port, () => {
