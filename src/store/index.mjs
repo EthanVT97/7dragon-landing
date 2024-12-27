@@ -1,5 +1,9 @@
 import { createStore } from 'vuex'
 import { createClient } from '@supabase/supabase-js'
+import dotenv from 'dotenv'
+
+// Load environment variables
+dotenv.config()
 
 const supabaseUrl = process.env.VUE_APP_SUPABASE_URL
 const supabaseKey = process.env.VUE_APP_SUPABASE_KEY

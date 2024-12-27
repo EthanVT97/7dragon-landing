@@ -28,8 +28,8 @@
 
 <script>
 import { ref } from 'vue'
-import { createInitialAdmin } from '@/utils/createInitialAdmin'
 import { useRouter } from 'vue-router'
+import { createInitialAdmin } from '@/utils/createInitialAdmin.mjs'
 
 export default {
   name: 'AdminSetup',

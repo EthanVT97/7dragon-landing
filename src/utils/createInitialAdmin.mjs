@@ -1,5 +1,5 @@
-const { validateNickname } = require('./userProfile.js')
-const { createAdminProfile, supabaseAdmin } = require('../../scripts/adminUtils.js')
+import { validateNickname } from './userProfile.mjs'
+import { createAdminProfile, supabaseAdmin } from '../../scripts/adminUtils.mjs'
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -116,4 +116,4 @@ const createInitialAdmin = async (email, password, username, nickname) => {
   }
 }
 
-module.exports = { createInitialAdmin }
+export { createInitialAdmin }

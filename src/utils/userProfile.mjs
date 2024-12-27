@@ -1,4 +1,4 @@
-const supabase = require('../supabase/index.js')
+import { supabase } from '../supabase/index.mjs'
 
 /**
  * Validate nickname
@@ -147,7 +147,7 @@ const getAdminsWithoutNicknames = async () => {
   }
 }
 
-module.exports = { 
+export { 
   validateNickname, 
   updateUserNickname, 
   updateAdminNicknames, 
