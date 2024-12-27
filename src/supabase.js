@@ -1,23 +1,12 @@
-const { createClient } = require('@supabase/supabase-js')
-const dotenv = require('dotenv')
-
-// Load environment variables
-dotenv.config()
+import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.VUE_APP_SUPABASE_URL
 const supabaseKey = process.env.VUE_APP_SUPABASE_KEY
 
 if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Supabase URL and Key are required. Please check your .env file.')
+  throw new Error('Missing Supabase environment variables')
 }
 
-// Create Supabase client with auth configuration
-const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: false,
-    detectSessionInUrl: false
-  }
-})
+export const supabase = createClient(supabaseUrl, supabaseKey)
 
-module.exports = { supabase }
+export default supabase
