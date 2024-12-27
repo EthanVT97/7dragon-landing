@@ -36,7 +36,7 @@
 import { ref } from 'vue'
 
 export default {
-  name: 'Content',
+  name: 'AdminContent',
   setup() {
     const content = ref({
       hero: {

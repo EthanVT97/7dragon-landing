@@ -87,7 +87,7 @@ export default createStore({
         commit('ADD_MESSAGE', message)
         
         // Send to Supabase
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('messages')
           .insert([{
             content: content,
