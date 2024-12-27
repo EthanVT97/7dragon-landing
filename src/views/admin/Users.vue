@@ -29,44 +29,47 @@
     <!-- Create/Edit Modal -->
     <div v-if="showCreateModal" class="modal">
       <div class="modal-content">
-        <h2>{{ isEditing ? 'Edit Admin User' : 'Create Admin User' }}</h2>
-        <form @submit.prevent="handleSubmit">
+        <h2>{{ isEditing ? 'Edit' : 'Create' }} Admin User</h2>
+        <form @submit.prevent="submitForm">
           <div class="form-group">
-            <label>Username</label>
-            <input 
-              v-model="formData.username" 
-              type="text" 
+            <label for="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              v-model="formData.username"
               required
-              :disabled="isEditing"
-            >
+            />
           </div>
           <div class="form-group">
-            <label>Email</label>
-            <input 
-              v-model="formData.email" 
-              type="email" 
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              v-model="formData.email"
               required
-              :disabled="isEditing"
-            >
+            />
+          </div>
+          <div class="form-group" v-if="!isEditing">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              v-model="formData.password"
+              required
+            />
           </div>
           <div class="form-group">
-            <label>Password</label>
-            <input 
-              v-model="formData.password" 
-              type="password" 
-              :required="!isEditing"
-            >
-          </div>
-          <div class="form-group">
-            <label>Role</label>
-            <select v-model="formData.role">
+            <label for="role">Role</label>
+            <select id="role" v-model="formData.role">
               <option value="admin">Admin</option>
               <option value="super_admin">Super Admin</option>
             </select>
           </div>
           <div class="modal-actions">
-            <button type="button" @click="closeModal" class="btn-cancel">Cancel</button>
-            <button type="submit" class="btn-submit">
+            <button type="button" @click="showCreateModal = false" class="btn-cancel">
+              Cancel
+            </button>
+            <button type="submit" class="btn-save">
               {{ isEditing ? 'Update' : 'Create' }}
             </button>
           </div>
@@ -89,7 +92,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, reactive } from 'vue'
 import { useStore } from 'vuex'
 
 export default {
@@ -101,29 +104,39 @@ export default {
     const showDeleteModal = ref(false)
     const isEditing = ref(false)
     const selectedUser = ref(null)
-    const formData = ref({
+    const formData = reactive({
       username: '',
       email: '',
       password: '',
       role: 'admin'
     })
 
+    const resetForm = () => {
+      formData.username = ''
+      formData.email = ''
+      formData.password = ''
+      formData.role = 'admin'
+      isEditing.value = false
+      selectedUser.value = null
+    }
+
     const loadUsers = async () => {
       const { data, error } = await store.dispatch('getAdminUsers')
       if (error) {
-        console.error('Failed to load admin users:', error)
+        console.error('Failed to load users:', error)
         return
       }
       adminUsers.value = data
     }
 
-    const handleSubmit = async () => {
+    const submitForm = async () => {
       if (isEditing.value) {
         const { error } = await store.dispatch('updateAdminUser', {
           userId: selectedUser.value.user_id,
           updates: {
-            role: formData.value.role,
-            ...(formData.value.password ? { password: formData.value.password } : {})
+            username: formData.username,
+            email: formData.email,
+            role: formData.role
           }
         })
         if (error) {
@@ -131,7 +144,7 @@ export default {
           return
         }
       } else {
-        const { error } = await store.dispatch('createAdminUser', formData.value)
+        const { error } = await store.dispatch('createAdminUser', formData)
         if (error) {
           console.error('Failed to create user:', error)
           return
@@ -139,17 +152,15 @@ export default {
       }
       
       await loadUsers()
-      closeModal()
+      showCreateModal.value = false
+      resetForm()
     }
 
     const editUser = (user) => {
       selectedUser.value = user
-      formData.value = {
-        username: user.username,
-        email: user.email,
-        password: '',
-        role: user.role
-      }
+      formData.username = user.username
+      formData.email = user.email
+      formData.role = user.role
       isEditing.value = true
       showCreateModal.value = true
     }
@@ -165,24 +176,14 @@ export default {
         console.error('Failed to delete user:', error)
         return
       }
+      
       showDeleteModal.value = false
+      selectedUser.value = null
       await loadUsers()
     }
 
-    const closeModal = () => {
-      showCreateModal.value = false
-      showDeleteModal.value = false
-      isEditing.value = false
-      selectedUser.value = null
-      formData.value = {
-        username: '',
-        email: '',
-        password: '',
-        role: 'admin'
-      }
-    }
-
-    onMounted(loadUsers)
+    // Load users when component mounts
+    loadUsers()
 
     return {
       adminUsers,
@@ -191,11 +192,10 @@ export default {
       isEditing,
       selectedUser,
       formData,
-      handleSubmit,
+      submitForm,
       editUser,
       confirmDelete,
-      deleteUser,
-      closeModal
+      deleteUser
     }
   }
 }
@@ -381,7 +381,7 @@ export default {
       }
     }
     
-    &.btn-submit {
+    &.btn-save {
       background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-accent) 100%);
       border: none;
       color: white;
