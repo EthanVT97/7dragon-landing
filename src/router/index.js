@@ -93,7 +93,7 @@ const router = createRouter({
 })
 
 // Navigation Guards
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const store = useStore()
   const isAuthenticated = store.getters.isAuthenticated
   const user = store.getters.currentUser
@@ -106,9 +106,20 @@ router.beforeEach((to, from, next) => {
         path: '/login',
         query: { redirect: to.fullPath }
       })
-    } else if (to.matched.some(record => record.meta.adminOnly) && (!user || user.role !== 'admin')) {
-      // Redirect to home if not admin
-      next({ path: '/' })
+    } else if (to.matched.some(record => record.meta.adminOnly)) {
+      // Check if user has admin role
+      if (!user || user.role !== 'admin') {
+        console.warn('Access denied: Admin role required')
+        next({ 
+          path: '/',
+          query: { 
+            error: 'access_denied',
+            message: 'Admin access required'
+          }
+        })
+      } else {
+        next()
+      }
     } else {
       next()
     }

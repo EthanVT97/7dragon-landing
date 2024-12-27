@@ -159,6 +159,7 @@ export default createStore({
     
     async login({ commit }, { email, password }) {
       try {
+        // Sign in with email and password
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password
@@ -166,22 +167,31 @@ export default createStore({
         
         if (error) throw error
 
-        // Get user role from profiles table
-        const { data: profile, error: profileError } = await supabase
+        // Get user role from profiles table with error handling
+        const { data: profiles, error: profileError } = await supabase
           .from('profiles')
-          .select('role')
+          .select('role, username')
           .eq('id', data.user.id)
-          .single()
+          .limit(1)
 
-        if (profileError) throw profileError
+        if (profileError) {
+          console.error('Profile fetch error:', profileError)
+          throw new Error('Failed to fetch user profile')
+        }
+
+        if (!profiles || profiles.length === 0) {
+          throw new Error('User profile not found')
+        }
 
         // Set user with role information
-        commit('SET_USER', {
+        const userWithProfile = {
           ...data.user,
-          role: profile.role
-        })
-
-        return { user: data.user }
+          role: profiles[0].role,
+          username: profiles[0].username
+        }
+        
+        commit('SET_USER', userWithProfile)
+        return { user: userWithProfile }
       } catch (error) {
         console.error('Login error:', error)
         return { error }
