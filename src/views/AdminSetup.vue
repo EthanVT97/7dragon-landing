@@ -44,7 +44,7 @@ export default {
       errorMessage.value = ''
       
       try {
-        const { error } = await createInitialAdmin()
+        const { error, success } = await createInitialAdmin()
         if (error) {
           console.error('Setup failed:', error)
           if (error.type === 'ADMIN_EXISTS') {
@@ -55,8 +55,11 @@ export default {
               console.error('Error details:', error.details)
             }
           }
-        } else {
+        } else if (success) {
+          console.log('Admin setup completed successfully')
           setupComplete.value = true
+        } else {
+          errorMessage.value = 'Failed to create admin user for an unknown reason'
         }
       } catch (error) {
         console.error('Unexpected error:', error)

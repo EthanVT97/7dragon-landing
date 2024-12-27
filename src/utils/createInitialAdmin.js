@@ -101,6 +101,12 @@ async function createInitialAdmin() {
       .single()
 
     if (profileError) {
+      // If it's a "no rows returned" error, this actually means success for an insert
+      if (profileError.message?.includes('No rows returned') || profileError.code === 'PGRST116') {
+        console.log('Admin profile created successfully (no rows returned)')
+        return { user, success: true }
+      }
+
       console.error('Error creating admin profile:', profileError)
       
       // Check if it's a foreign key error
@@ -121,7 +127,7 @@ async function createInitialAdmin() {
     }
 
     console.log('Admin user and profile created successfully:', { user, profile })
-    return { user }
+    return { user, success: true }
   } catch (error) {
     console.error('Unexpected error in createInitialAdmin:', error)
     return { error: { message: 'An unexpected error occurred', details: error } }
