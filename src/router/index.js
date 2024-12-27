@@ -42,7 +42,7 @@ const routes = [
     meta: { requiresAuth: true, adminOnly: true },
     children: [
       {
-        path: '',
+        path: 'dashboard',
         name: 'AdminDashboard',
         component: () => import('@/views/admin/Dashboard.vue')
       },
@@ -104,6 +104,9 @@ router.beforeEach((to, from, next) => {
         path: '/login',
         query: { redirect: to.fullPath }
       })
+    } else if (to.matched.some(record => record.meta.adminOnly) && !store.getters.isAdmin) {
+      // Redirect to home if not admin
+      next({ path: '/' })
     } else {
       next()
     }

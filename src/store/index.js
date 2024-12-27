@@ -238,7 +238,9 @@ export default createStore({
     isAuthenticated: state => !!state.user,
     currentUser: state => state.user,
     messageHistory: state => state.messages,
+    isAdmin: state => state.user && state.user.role === 'admin',
     unreadCount: state => state.unreadMessages,
+    connectionStatus: state => state.isConnected,
     isDark: state => state.isDarkMode,
     language: state => state.currentLanguage
   }
