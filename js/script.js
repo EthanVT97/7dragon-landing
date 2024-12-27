@@ -1,3 +1,18 @@
+// Loading Screen
+document.addEventListener('DOMContentLoaded', function() {
+    const loadingScreen = document.getElementById('loadingScreen');
+    
+    // Hide loading screen after all content is loaded
+    window.addEventListener('load', function() {
+        setTimeout(() => {
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 500);
+        }, 1000);
+    });
+});
+
 // Language Switcher
 document.addEventListener('DOMContentLoaded', function() {
     const langButtons = document.querySelectorAll('.lang-btn');
@@ -17,13 +32,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Chat functionality
 let chatOpen = false;
+let unreadMessages = 1; // Initial notification
 
 function toggleChat() {
     const chatContainer = document.getElementById('chatContainer');
+    const notificationBadge = document.getElementById('chatNotification');
     chatOpen = !chatOpen;
     chatContainer.style.display = chatOpen ? 'block' : 'none';
-    if (chatOpen && !chatInitialized) {
-        initializeChat();
+    
+    if (chatOpen) {
+        // Clear notifications when chat is opened
+        unreadMessages = 0;
+        notificationBadge.style.display = 'none';
+        
+        if (!chatInitialized) {
+            initializeChat();
+        }
     }
 }
 
@@ -35,6 +59,57 @@ function initializeChat() {
         my: "မင်္ဂလာပါ။ 7Dragon မှ ကြိုဆိုပါတယ်။ ကျွန်တော်တို့ ဘယ်လိုကူညီပေးရမလဲ?",
         en: "Welcome to 7Dragon! How can we assist you today?"
     });
+    
+    // Add quick reply buttons
+    addQuickReplies([
+        { my: "ဂိမ်းဆော့နည်း", en: "How to Play" },
+        { my: "ငွေဖြည့်နည်း", en: "Deposit" },
+        { my: "ငွေထုတ်နည်း", en: "Withdraw" }
+    ]);
+}
+
+function addQuickReplies(replies) {
+    const messagesContainer = document.getElementById('chatMessages');
+    const quickRepliesDiv = document.createElement('div');
+    quickRepliesDiv.className = 'quick-replies';
+    
+    replies.forEach(reply => {
+        const button = document.createElement('button');
+        button.innerHTML = `
+            <span class="my">${reply.my}</span>
+            <span class="en">${reply.en}</span>
+        `;
+        button.onclick = () => handleQuickReply(reply);
+        quickRepliesDiv.appendChild(button);
+    });
+    
+    messagesContainer.appendChild(quickRepliesDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function handleQuickReply(reply) {
+    // Show user's selection
+    addMessage("user", reply.en);
+    
+    // Simulate bot response
+    setTimeout(() => {
+        const responses = {
+            "How to Play": {
+                my: "ဂိမ်းဆော့ရန် https://www.m9asia.com သို့သွားပါ။ Sign Up လုပ်ပြီး ငွေဖြည့်ပါ။",
+                en: "Visit https://www.m9asia.com to play. Sign up and make a deposit to start playing."
+            },
+            "Deposit": {
+                my: "ငွေဖြည့်ရန် ကျွန်ုပ်တို့၏ ဝန်ဆောင်မှုဖုန်းနံပါတ်သို့ ဆက်သွယ်ပါ။",
+                en: "Please contact our customer service for deposit information."
+            },
+            "Withdraw": {
+                my: "ငွေထုတ်ရန် ကျွန်ုပ်တို့၏ ဝန်ဆောင်မှုဖုန်းနံပါတ်သို့ ဆက်သွယ်ပါ။",
+                en: "Please contact our customer service for withdrawal information."
+            }
+        };
+        
+        addMessage("bot", responses[reply.en]);
+    }, 1000);
 }
 
 function sendMessage() {
