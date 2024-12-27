@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: 7dragon-chat
+    name: 7dragon-chat-master
     env: node
     buildCommand: npm install && npm run build
     startCommand: npm start
