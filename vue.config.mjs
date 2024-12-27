@@ -16,11 +16,8 @@ export default defineConfig({
         ...args[0].meta,
         'Content-Security-Policy': {
           'http-equiv': 'Content-Security-Policy',
-          content: "default-src 'self'; font-src 'self' https://fonts.gstatic.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co;"
-        },
-        'X-Content-Type-Options': { 'http-equiv': 'X-Content-Type-Options', content: 'nosniff' },
-        'X-Frame-Options': { 'http-equiv': 'X-Frame-Options', content: 'DENY' },
-        'X-XSS-Protection': { 'http-equiv': 'X-XSS-Protection', content: '1; mode=block' }
+          content: "default-src 'self'; font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co;"
+        }
       }
       args[0].favicon = 'public/18klogo.jpg'
       return args
@@ -107,6 +104,16 @@ export default defineConfig({
       moduleIds: 'deterministic',
       runtimeChunk: 'single',
       minimize: true
+    },
+    module: {
+      rules: [
+        {
+          test: /\.m?js$/,
+          resolve: {
+            fullySpecified: false
+          }
+        }
+      ]
     }
   }
 })
