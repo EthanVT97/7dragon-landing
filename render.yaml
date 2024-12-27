@@ -9,3 +9,4 @@ services:
         value: 18.0.0
       - key: NODE_ENV
         value: production
+    autoDeploy: true
