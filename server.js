@@ -12,6 +12,12 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Enable request logging
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
+
 // Trust proxy for Render deployment
 app.set('trust proxy', 1);
 
@@ -41,28 +47,8 @@ app.use(helmet({
     },
   },
   crossOriginEmbedderPolicy: false,
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  frameguard: {
-    action: 'deny'
-  }
+  crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
-
-// Additional security headers
-app.use((req, res, next) => {
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  next();
-});
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use(limiter);
 
 // Enable CORS with WebSocket support
 app.use(cors({
@@ -80,24 +66,50 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'healthy' });
 });
 
+// Check if dist directory exists
+const distPath = path.join(__dirname, 'dist');
+console.log(`Checking dist directory: ${distPath}`);
+try {
+  if (!require('fs').existsSync(distPath)) {
+    console.error('Error: dist directory does not exist');
+    process.exit(1);
+  }
+} catch (err) {
+  console.error('Error checking dist directory:', err);
+  process.exit(1);
+}
+
 // Serve static files from the Vue app build directory
-app.use(express.static(path.join(__dirname, 'dist'), {
+app.use(express.static(distPath, {
   maxAge: '1h',
   etag: true,
-  lastModified: true
+  lastModified: true,
+  setHeaders: (res, path) => {
+    if (path.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  }
 }));
 
 // Handle SPA routing
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  res.sendFile(path.join(distPath, 'index.html'), err => {
+    if (err) {
+      console.error('Error sending index.html:', err);
+      res.status(500).send('Error loading application');
+    }
+  });
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('Application error:', err.stack);
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-app.listen(port, () => {
+// Start server
+const server = app.listen(port, () => {
   console.log(`Server running on port ${port}`);
+  console.log(`Environment: ${process.env.NODE_ENV}`);
+  console.log(`Static files being served from: ${distPath}`);
 });

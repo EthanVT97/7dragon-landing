@@ -1,14 +1,24 @@
 import { defineConfig } from '@vue/cli-service'
 import CompressionPlugin from 'compression-webpack-plugin'
+import TerserPlugin from 'terser-webpack-plugin'
+import path from 'path'
 
 export default defineConfig({
+  publicPath: '/',
+  outputDir: 'dist',
+  assetsDir: 'assets',
+  productionSourceMap: false,
+  
   css: {
+    extract: true,
+    sourceMap: false,
     loaderOptions: {
       scss: {
         additionalData: `@use "@/assets/styles/_variables" as *;`
       }
     }
   },
+
   chainWebpack: config => {
     // Add security headers
     config.plugin('html').tap(args => {
@@ -20,24 +30,22 @@ export default defineConfig({
         }
       }
       args[0].favicon = 'public/18klogo.jpg'
+      args[0].title = '18K Chat'
       return args
     })
 
     // Optimize chunks
     config.optimization.splitChunks({
+      chunks: 'all',
+      maxInitialRequests: Infinity,
+      minSize: 0,
       cacheGroups: {
-        defaultVendors: {
-          name: 'chunk-vendors',
+        vendor: {
           test: /[\\/]node_modules[\\/]/,
-          priority: -10,
-          chunks: 'initial'
-        },
-        common: {
-          name: 'chunk-common',
-          minChunks: 2,
-          priority: -20,
-          chunks: 'initial',
-          reuseExistingChunk: true
+          name(module) {
+            const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1]
+            return `vendor.${packageName.replace('@', '')}`
+          }
         }
       }
     })
@@ -83,7 +91,17 @@ export default defineConfig({
         limit: 4096,
         name: 'fonts/[name].[hash:8].[ext]'
       })
+
+    // Handle ES modules
+    config.module
+      .rule('mjs')
+      .test(/\.mjs$/)
+      .include
+      .add(/node_modules/)
+      .end()
+      .type('javascript/auto')
   },
+
   configureWebpack: {
     resolve: {
       fallback: {
@@ -93,6 +111,10 @@ export default defineConfig({
         crypto: false,
         stream: false,
         buffer: false
+      },
+      extensions: ['.mjs', '.js', '.jsx', '.vue', '.json'],
+      alias: {
+        '@': path.resolve(__dirname, 'src')
       }
     },
     performance: {
@@ -103,7 +125,17 @@ export default defineConfig({
     optimization: {
       moduleIds: 'deterministic',
       runtimeChunk: 'single',
-      minimize: true
+      minimize: true,
+      minimizer: [
+        new TerserPlugin({
+          terserOptions: {
+            compress: {
+              drop_console: process.env.NODE_ENV === 'production',
+              drop_debugger: true
+            }
+          }
+        })
+      ]
     },
     module: {
       rules: [
