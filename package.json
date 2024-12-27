@@ -8,10 +8,11 @@
     "dev": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "postinstall": "npm run build",
+    "postinstall": "npm install @vue/cli-service && npm run build",
     "init-admin": "node scripts/initAdmin.js"
   },
   "dependencies": {
+    "@vue/cli-service": "~5.0.8",
     "@supabase/supabase-js": "^2.47.10",
     "chart.js": "^4.4.1",
     "compression": "^1.7.5",
@@ -41,7 +42,6 @@
     "@vue/cli-plugin-eslint": "~5.0.8",
     "@vue/cli-plugin-router": "~5.0.8",
     "@vue/cli-plugin-vuex": "~5.0.8",
-    "@vue/cli-service": "~5.0.8",
     "@vue/compiler-sfc": "^3.3.13",
     "compression-webpack-plugin": "^11.1.0",
     "crypto-browserify": "^3.12.1",
