@@ -1,5 +1,5 @@
-const { createClient } = require('@supabase/supabase-js')
-const dotenv = require('dotenv')
+import { createClient } from '@supabase/supabase-js'
+import dotenv from 'dotenv'
 
 // Load environment variables
 dotenv.config()
@@ -12,7 +12,7 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 // Create Supabase client with auth configuration
-const supabase = createClient(supabaseUrl, supabaseKey, {
+export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: false,
@@ -56,7 +56,7 @@ const enableRealtimeForTables = async () => {
 enableRealtimeForTables()
 
 // Export reusable database functions
-const db = {
+export const db = {
   /**
    * Execute a stored function
    * @param {string} functionName - Name of the function to execute
@@ -141,7 +141,7 @@ const db = {
 }
 
 // Export helper functions
-const helpers = {
+export const helpers = {
   /**
    * Subscribe to realtime updates for a specific record
    * @param {string} table - Table name
@@ -184,9 +184,3 @@ const helpers = {
 
 // Set up periodic cleanup of typing indicators
 setInterval(helpers.cleanupTypingIndicators, 5000)
-
-module.exports = { 
-  supabase,
-  db,
-  helpers
-}

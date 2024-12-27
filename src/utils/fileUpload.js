@@ -1,4 +1,4 @@
-import { supabase } from '@/supabase'
+import { supabase } from '@/supabase/index.mjs'
 
 /**
  * Upload an image to Supabase storage and create a chat message
