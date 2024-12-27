@@ -47,9 +47,20 @@ export default defineConfig({
         vendor: {
           test: /[\\/]node_modules[\\/]/,
           name(module) {
-            const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1]
+            if (!module.context) return 'vendor'
+            const match = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)
+            if (!match) return 'vendor'
+            const packageName = match[1]
             return `vendor.${packageName.replace('@', '')}`
-          }
+          },
+          priority: -10,
+          reuseExistingChunk: true
+        },
+        common: {
+          minChunks: 2,
+          priority: -20,
+          reuseExistingChunk: true,
+          name: 'common'
         }
       }
     })
