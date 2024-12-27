@@ -59,28 +59,19 @@ module.exports = defineConfig({
     // Optimize images
     config.module
       .rule('images')
-      .use('image-webpack-loader')
-      .loader('image-webpack-loader')
+      .test(/\.(png|jpe?g|gif|webp|avif)$/i)
+      .use('url-loader')
+      .loader('url-loader')
       .options({
-        bypassOnDebug: true,
-        mozjpeg: {
-          progressive: true,
-          quality: 65
-        },
-        optipng: {
-          enabled: false
-        },
-        pngquant: {
-          quality: [0.65, 0.90],
-          speed: 4
-        },
-        gifsicle: {
-          interlaced: false
-        },
-        webp: {
-          quality: 75
+        limit: 4096,
+        fallback: {
+          loader: 'file-loader',
+          options: {
+            name: 'img/[name].[hash:8].[ext]'
+          }
         }
       })
+      .end()
 
     // Optimize font awesome
     config.module
@@ -92,7 +83,7 @@ module.exports = defineConfig({
       .use('url-loader')
       .loader('url-loader')
       .options({
-        limit: 8192,
+        limit: 4096,
         name: 'fonts/[name].[hash:8].[ext]'
       })
   },
@@ -108,7 +99,7 @@ module.exports = defineConfig({
       }
     },
     performance: {
-      hints: 'warning',
+      hints: false,
       maxEntrypointSize: 512000,
       maxAssetSize: 512000
     },
