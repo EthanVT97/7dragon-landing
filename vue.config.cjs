@@ -10,6 +10,14 @@ module.exports = defineConfig({
   },
   chainWebpack: config => {
     config.plugin('html').tap(args => {
+      // Add CSP headers
+      args[0].meta = {
+        ...args[0].meta,
+        'Content-Security-Policy': {
+          'http-equiv': 'Content-Security-Policy',
+          content: "default-src 'self'; font-src 'self' https://fonts.gstatic.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;"
+        }
+      }
       args[0].favicon = 'public/18klogo.jpg'
       return args
     })
@@ -21,28 +29,21 @@ module.exports = defineConfig({
         vendor: {
           test: /[\\/]node_modules[\\/]/,
           name: 'vendors',
-          chunks: 'all',
-          priority: 1
+          chunks: 'all'
         }
       }
     })
   },
+  // Configure module resolution
   configureWebpack: {
-    performance: {
-      hints: 'warning',
-      maxEntrypointSize: 1024 * 1024, // 1MB
-      maxAssetSize: 1024 * 1024
-    },
-    optimization: {
-      moduleIds: 'deterministic',
-      runtimeChunk: 'single',
-      minimize: true
-    },
     resolve: {
       fallback: {
-        path: false,
-        os: false,
-        crypto: false
+        "path": false,
+        "fs": false,
+        "os": false,
+        "crypto": false,
+        "stream": false,
+        "buffer": false
       }
     }
   }
