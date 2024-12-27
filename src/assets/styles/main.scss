@@ -1,181 +1,136 @@
 // Variables
-$color-background: #000000;
-$color-primary: #4B0082;
-$color-secondary: #008080;
-$color-accent: #00FF7F;
-$color-highlight: #00FFFF;
-$color-text: #FFFFE0;
+$font-size-base: 16px;
+$background: #f9f9f9;
+$text: #333;
+$primary: #4B0082;
+$secondary: #008080;
+$accent: #00FF7F;
+$spacing-sm: 0.5rem;
+$spacing-md: 1rem;
+$spacing-lg: 2rem;
+$border-radius-sm: 4px;
+$border-radius-md: 8px;
+$mobile: 768px;
 
-// Reset & Base Styles
-* {
+// Base styles
+html, body {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Noto Sans Myanmar', Arial, sans-serif;
-  line-height: 1.6;
-  color: $color-text;
-  background-color: $color-background;
+  font-size: $font-size-base;
+  background-color: $background;
+  color: $text;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 // Typography
 h1, h2, h3, h4, h5, h6 {
-  margin-bottom: 1rem;
-  font-weight: 700;
-  line-height: 1.2;
+  margin-top: 0;
+  color: $text;
 }
 
-h1 { font-size: 2.5rem; }
-h2 { font-size: 2rem; }
-h3 { font-size: 1.75rem; }
-h4 { font-size: 1.5rem; }
-h5 { font-size: 1.25rem; }
-h6 { font-size: 1rem; }
+// Links
+a {
+  color: $accent;
+  text-decoration: none;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: darken($accent, 10%);
+  }
+}
 
 // Buttons
 .btn {
   display: inline-block;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $border-radius-md;
   border: none;
   cursor: pointer;
-  font-weight: 500;
   transition: all 0.3s ease;
+  font-size: $font-size-base;
 
   &-primary {
-    background-color: $color-primary;
-    color: $color-text;
+    background-color: $primary;
+    color: $text;
 
     &:hover {
-      background-color: darken($color-primary, 10%);
+      background-color: darken($primary, 10%);
     }
   }
 
   &-secondary {
-    background-color: $color-secondary;
-    color: $color-text;
+    background-color: $secondary;
+    color: $text;
 
     &:hover {
-      background-color: darken($color-secondary, 10%);
-    }
-  }
-
-  &-accent {
-    background-color: $color-accent;
-    color: $color-background;
-
-    &:hover {
-      background-color: darken($color-accent, 10%);
+      background-color: darken($secondary, 10%);
     }
   }
 }
 
-// Forms
-.form-group {
-  margin-bottom: 1rem;
+// Form elements
+input, textarea {
+  background-color: lighten($background, 10%);
+  border: 1px solid $secondary;
+  border-radius: $border-radius-sm;
+  padding: $spacing-sm;
+  color: $text;
+  font-size: $font-size-base;
 
-  label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: $color-text;
-  }
-
-  input, textarea, select {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid rgba($color-text, 0.2);
-    border-radius: 4px;
-    background-color: rgba($color-background, 0.8);
-    color: $color-text;
-
-    &:focus {
-      outline: none;
-      border-color: $color-accent;
-      box-shadow: 0 0 0 2px rgba($color-accent, 0.2);
-    }
+  &:focus {
+    outline: none;
+    border-color: $accent;
   }
 }
 
-// Cards
-.card {
-  background-color: rgba($color-primary, 0.1);
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-  border: 1px solid rgba($color-accent, 0.2);
-  backdrop-filter: blur(10px);
-  transition: transform 0.3s ease;
-
-  &:hover {
-    transform: translateY(-5px);
-  }
-}
-
-// Utilities
-.container {
-  width: 100%;
+// Chat container
+.chat-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: $spacing-lg;
 }
 
-.text-center { text-align: center; }
-.text-right { text-align: right; }
-.text-left { text-align: left; }
+// Chat messages
+.message {
+  margin-bottom: $spacing-md;
+  padding: $spacing-sm;
+  border-radius: $border-radius-md;
 
-.mt-1 { margin-top: 1rem; }
-.mt-2 { margin-top: 2rem; }
-.mt-3 { margin-top: 3rem; }
-.mb-1 { margin-bottom: 1rem; }
-.mb-2 { margin-bottom: 2rem; }
-.mb-3 { margin-bottom: 3rem; }
+  &-user {
+    background-color: $primary;
+    margin-left: 20%;
+  }
+
+  &-bot {
+    background-color: $secondary;
+    margin-right: 20%;
+  }
+}
+
+// Responsive design
+@media (max-width: $mobile) {
+  .chat-container {
+    padding: $spacing-sm;
+  }
+
+  .message {
+    margin-left: $spacing-sm;
+    margin-right: $spacing-sm;
+  }
+}
 
 // Animations
-@keyframes glow {
-  0% { box-shadow: 0 0 5px rgba($color-accent, 0.5); }
-  50% { box-shadow: 0 0 20px rgba($color-accent, 0.8); }
-  100% { box-shadow: 0 0 5px rgba($color-accent, 0.5); }
-}
-
-.glow {
-  animation: glow 2s infinite;
-}
-
-// Responsive Design
-@mixin mobile {
-  @media (max-width: 768px) { @content; }
-}
-
-@mixin tablet {
-  @media (min-width: 769px) and (max-width: 1024px) { @content; }
-}
-
-@mixin desktop {
-  @media (min-width: 1025px) { @content; }
-}
-
-// Grid System
-.grid {
-  display: grid;
-  gap: 1rem;
-
-  @include mobile {
-    grid-template-columns: 1fr;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
-
-  @include tablet {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @include desktop {
-    grid-template-columns: repeat(3, 1fr);
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-// Dark Mode
-.dark-theme {
-  --color-background: #000000;
-  --color-text: #FFFFE0;
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
 }
