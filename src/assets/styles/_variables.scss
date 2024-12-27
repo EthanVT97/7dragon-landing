@@ -1,5 +1,3 @@
-@use "sass:color";
-
 // Color Variables
 $background: #000000;    // Midnight Soft Moon
 $primary: #4B0082;      // Deep Green
@@ -8,15 +6,6 @@ $accent: #00FF7F;       // Vibrant Green
 $highlight: #00FFFF;    // Soft Cyan
 $text: #FFFFE0;         // Moonlight White
 $error: #FF0000;        // Error Red
-
-// Color Functions
-@function darken-color($color, $amount) {
-  @return color.adjust($color, $lightness: -$amount);
-}
-
-@function lighten-color($color, $amount) {
-  @return color.adjust($color, $lightness: $amount);
-}
 
 // Breakpoints
 $mobile: 576px;

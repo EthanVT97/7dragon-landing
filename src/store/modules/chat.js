@@ -17,7 +17,17 @@ export default {
     error: null,
     typingStatus: {},
     messageReactions: {},
-    replyThreads: {}
+    replyThreads: {},
+    supportStatus: {
+      isOnline: true,
+      lastChecked: null
+    },
+    emergencySupport: {
+      active: false,
+      type: null,
+      timestamp: null
+    },
+    quickResponses: {}
   }),
 
   getters: {
@@ -33,7 +43,10 @@ export default {
     },
     getMessageReplies: (state) => (messageId) => {
       return state.replyThreads[messageId] || []
-    }
+    },
+    isSupportOnline: state => state.supportStatus.isOnline,
+    isEmergencyActive: state => state.emergencySupport.active,
+    getEmergencyDetails: state => state.emergencySupport
   },
 
   mutations: {
@@ -74,6 +87,22 @@ export default {
         ...state.replyThreads,
         [messageId]: replies
       }
+    },
+    SET_SUPPORT_STATUS(state, { isOnline, timestamp }) {
+      state.supportStatus = {
+        isOnline,
+        lastChecked: timestamp
+      }
+    },
+    SET_EMERGENCY_SUPPORT(state, { active, type, timestamp }) {
+      state.emergencySupport = {
+        active,
+        type,
+        timestamp
+      }
+    },
+    SET_QUICK_RESPONSES(state, responses) {
+      state.quickResponses = responses
     }
   },
 
@@ -240,6 +269,88 @@ export default {
         return { success: true, replies: data }
       } catch (error) {
         console.error('Error loading message thread:', error)
+        return { success: false, error }
+      }
+    },
+
+    async checkSupportStatus({ commit }) {
+      try {
+        const response = await fetch('/api/support/status')
+        const { online } = await response.json()
+        
+        commit('SET_SUPPORT_STATUS', {
+          isOnline: online,
+          timestamp: new Date().toISOString()
+        })
+        
+        return { success: true, online }
+      } catch (error) {
+        console.error('Failed to check support status:', error)
+        return { success: false, error }
+      }
+    },
+
+    async triggerEmergencySupport({ commit, state }, type = 'urgent') {
+      try {
+        // Notify support staff
+        await supabase
+          .from('support_alerts')
+          .insert({
+            session_id: state.currentSession?.id,
+            type,
+            status: 'pending',
+            priority: 'high'
+          })
+
+        // Update local state
+        commit('SET_EMERGENCY_SUPPORT', {
+          active: true,
+          type,
+          timestamp: new Date().toISOString()
+        })
+
+        // Send system message
+        await this.dispatch('chat/sendMessage', {
+          content: '🚨 Emergency support has been notified. A support agent will join shortly.',
+          type: 'system'
+        })
+
+        return { success: true }
+      } catch (error) {
+        console.error('Failed to trigger emergency support:', error)
+        return { success: false, error }
+      }
+    },
+
+    async triggerSelfExclusion({ dispatch }) {
+      return dispatch('triggerEmergencySupport', 'self-exclusion')
+    },
+
+    async exportChatTranscript({ state }, format = 'pdf') {
+      try {
+        const response = await fetch(`/api/chat/export/${format}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            sessionId: state.currentSession?.id,
+            messages: state.messages
+          })
+        })
+
+        if (!response.ok) throw new Error('Export failed')
+
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `chat-transcript-${new Date().toISOString()}.${format}`
+        a.click()
+
+        return { success: true }
+      } catch (error) {
+        console.error('Failed to export chat transcript:', error)
         return { success: false, error }
       }
     }

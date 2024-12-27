@@ -47,6 +47,14 @@
                 <i class="fas fa-robot"></i>
                 ChatBot Config
             </a>
+            <a href="#landing-page" class="menu-item" data-panel="landing-page">
+                <i class="fas fa-edit"></i>
+                Landing Page
+            </a>
+            <a href="#support" class="menu-item" data-panel="support">
+                <i class="fas fa-headset"></i>
+                Support Dashboard
+            </a>
             <a href="#settings" class="menu-item" data-panel="settings">
                 <i class="fas fa-cog"></i>
                 Settings
@@ -192,6 +200,180 @@
                         <!-- Config items will be loaded here -->
                     </tbody>
                 </table>
+            </div>
+        </section>
+
+        <!-- Landing Page Management Panel -->
+        <section id="landingPagePanel" class="admin-panel">
+            <div class="panel-header">
+                <h2>Landing Page Management</h2>
+                <div class="header-actions">
+                    <select id="contentSection" class="section-selector">
+                        <option value="marketing">Marketing</option>
+                        <option value="promotion">Promotions</option>
+                        <option value="games">Game Links</option>
+                    </select>
+                    <button class="btn-primary" onclick="addNewContent()">
+                        <i class="fas fa-plus"></i>
+                        Add New Content
+                    </button>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <!-- Marketing Section -->
+                <div class="content-section" id="marketingSection">
+                    <h3>Marketing Banners</h3>
+                    <div class="content-items" id="marketingItems"></div>
+                </div>
+
+                <!-- Promotions Section -->
+                <div class="content-section" id="promotionSection">
+                    <h3>Active Promotions</h3>
+                    <div class="content-items" id="promotionItems"></div>
+                </div>
+
+                <!-- Game Links Section -->
+                <div class="content-section" id="gamesSection">
+                    <h3>Game Links</h3>
+                    <div class="content-items" id="gameItems"></div>
+                </div>
+            </div>
+
+            <!-- Content Editor Modal -->
+            <div id="contentEditorModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="modalTitle">Edit Content</h3>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="contentForm">
+                            <div class="form-group">
+                                <label for="contentTitle">Title</label>
+                                <input type="text" id="contentTitle" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contentDescription">Description</label>
+                                <textarea id="contentDescription" rows="4"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="imageUpload">Image</label>
+                                <input type="file" id="imageUpload" accept="image/*">
+                                <div id="imagePreview"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="contentLink">Link URL</label>
+                                <input type="url" id="contentLink">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="startDate">Start Date</label>
+                                    <input type="datetime-local" id="startDate">
+                                </div>
+                                <div class="form-group">
+                                    <label for="endDate">End Date</label>
+                                    <input type="datetime-local" id="endDate">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="contentStatus">Status</label>
+                                <select id="contentStatus">
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                    <option value="scheduled">Scheduled</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+                        <button class="btn-primary" onclick="saveContent()">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Support Dashboard Panel -->
+        <section id="supportPanel" class="admin-panel">
+            <div class="panel-header">
+                <h2>Support Dashboard</h2>
+                <div class="support-controls">
+                    <select id="supportLanguage" class="language-selector">
+                        <option value="my" selected>Myanmar</option>
+                        <option value="en">English</option>
+                        <option value="th">Thai</option>
+                    </select>
+                    <button class="btn-primary" id="toggleSupportStatus">
+                        <i class="fas fa-toggle-on"></i>
+                        <span>Online</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="support-dashboard-container">
+                <!-- Support Metrics -->
+                <div class="support-metrics">
+                    <div class="metric-card">
+                        <h3>Active Chats</h3>
+                        <p id="activeChatsCount">0</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Pending Alerts</h3>
+                        <p id="pendingAlertsCount">0</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Avg Response Time</h3>
+                        <p id="avgResponseTime">0s</p>
+                    </div>
+                </div>
+
+                <!-- Emergency Queue -->
+                <div class="emergency-queue">
+                    <h3>Emergency Requests</h3>
+                    <div id="emergencyList" class="alert-list">
+                        <!-- Emergency alerts will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Active Chats -->
+                <div class="active-chats-container">
+                    <div class="chats-list">
+                        <h3>Active Conversations</h3>
+                        <div id="activeChatsList">
+                            <!-- Active chats will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Chat Interface -->
+                    <div class="chat-interface">
+                        <div id="chatHeader" class="chat-header">
+                            <span id="currentChatUser">Select a conversation</span>
+                            <div class="chat-actions">
+                                <button id="transferChat" class="btn-secondary" title="Transfer Chat">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </button>
+                                <button id="endChat" class="btn-danger" title="End Chat">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="chatMessages" class="chat-messages">
+                            <!-- Chat messages will be displayed here -->
+                        </div>
+
+                        <!-- Chat Support Panel Integration -->
+                        <div id="chatSupportPanel"></div>
+
+                        <div class="chat-input">
+                            <textarea id="messageInput" placeholder="Type your message..."></textarea>
+                            <button id="sendMessage">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 

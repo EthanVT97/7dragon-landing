@@ -1,13 +1,9 @@
-import { defineConfig } from '@vue/cli-service'
-import CompressionPlugin from 'compression-webpack-plugin'
-import path from 'path'
-import { fileURLToPath } from 'url'
-import webpack from 'webpack'
+const { defineConfig } = require('@vue/cli-service');
+const CompressionPlugin = require('compression-webpack-plugin');
+const path = require('path');
+const webpack = require('webpack');
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
-export default defineConfig({
+module.exports = defineConfig({
   publicPath: '/',
   outputDir: 'dist',
   assetsDir: 'assets',
@@ -102,4 +98,4 @@ export default defineConfig({
         }
       });
   }
-})
+});

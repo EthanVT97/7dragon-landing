@@ -1,4 +1,17 @@
 import supabase from './supabase.js';
+import { createI18n } from 'vue-i18n';
+import myTranslations from './src/locales/my.json';
+import { sevenDragonService } from './src/services/sevenDragonService';
+import { CONTENT_TYPES } from './src/config/sevenDragon';
+
+// Initialize i18n
+const i18n = createI18n({
+  locale: 'my', // Set Myanmar as default
+  fallbackLocale: 'en',
+  messages: {
+    my: myTranslations
+  }
+});
 
 // Check admin session
 const checkSession = () => {
@@ -16,6 +29,9 @@ const initDashboard = async () => {
 
     // Initialize charts
     initCharts();
+    
+    // Initialize support dashboard
+    initSupportDashboard();
     
     // Load initial data
     await loadDashboardData();
@@ -228,6 +244,183 @@ const setupRealtimeListeners = () => {
         .subscribe();
 };
 
+// Support Dashboard Functions
+const initSupportDashboard = async () => {
+    // Initialize support staff status
+    const { data: staffData } = await supabase
+        .from('support_staff')
+        .select('*')
+        .eq('user_id', supabase.auth.user().id)
+        .single();
+
+    if (staffData) {
+        document.getElementById('toggleSupportStatus').innerHTML = `
+            <i class="fas fa-toggle-${staffData.status === 'online' ? 'on' : 'off'}"></i>
+            <span>${staffData.status === 'online' ? 'Online' : 'Offline'}</span>
+        `;
+    }
+
+    // Initialize language selector
+    const languageSelector = document.getElementById('supportLanguage');
+    languageSelector.value = i18n.locale;
+    languageSelector.addEventListener('change', (e) => {
+        i18n.locale = e.target.value;
+    });
+
+    // Initialize metrics
+    await updateSupportMetrics();
+
+    // Initialize emergency queue
+    await loadEmergencyQueue();
+
+    // Initialize active chats
+    await loadActiveChats();
+
+    // Set up real-time subscriptions
+    setupSupportRealtimeListeners();
+};
+
+const updateSupportMetrics = async () => {
+    const { data: metrics } = await supabase
+        .rpc('get_support_metrics');
+
+    if (metrics) {
+        document.getElementById('activeChatsCount').textContent = metrics.active_chats;
+        document.getElementById('pendingAlertsCount').textContent = metrics.pending_alerts;
+        document.getElementById('avgResponseTime').textContent = `${metrics.avg_response_time}s`;
+    }
+};
+
+const loadEmergencyQueue = async () => {
+    const { data: alerts } = await supabase
+        .from('support_alerts')
+        .select('*')
+        .in('status', ['pending', 'assigned'])
+        .order('created_at', { ascending: false });
+
+    const emergencyList = document.getElementById('emergencyList');
+    emergencyList.innerHTML = alerts?.map(alert => `
+        <div class="alert-item ${alert.type}">
+            <div class="alert-info">
+                <span class="alert-type">${i18n.t(`chat.support.alerts.${alert.type}`)}</span>
+                <span class="alert-time">${new Date(alert.created_at).toLocaleTimeString()}</span>
+            </div>
+            <div class="alert-actions">
+                <button onclick="handleAlert('${alert.id}', 'accept')" class="btn-primary">
+                    ${i18n.t('chat.support.actions.accept')}
+                </button>
+            </div>
+        </div>
+    `).join('') || '';
+};
+
+const loadActiveChats = async () => {
+    const { data: chats } = await supabase
+        .from('chat_sessions')
+        .select('*')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+
+    const chatsList = document.getElementById('activeChatsList');
+    chatsList.innerHTML = chats?.map(chat => `
+        <div class="chat-item" onclick="selectChat('${chat.id}')">
+            <div class="chat-info">
+                <span class="chat-name">User ${chat.user_id.slice(0, 8)}</span>
+                <span class="chat-preview">${chat.last_message || ''}</span>
+            </div>
+        </div>
+    `).join('') || '';
+};
+
+const setupSupportRealtimeListeners = () => {
+    const supportChannel = supabase
+        .channel('support_updates')
+        .on('postgres_changes', { 
+            event: '*', 
+            schema: 'public', 
+            table: 'support_alerts' 
+        }, () => {
+            loadEmergencyQueue();
+            updateSupportMetrics();
+        })
+        .on('postgres_changes', { 
+            event: '*', 
+            schema: 'public', 
+            table: 'chat_sessions' 
+        }, () => {
+            loadActiveChats();
+            updateSupportMetrics();
+        })
+        .subscribe();
+
+    return () => {
+        supabase.removeChannel(supportChannel);
+    };
+};
+
+// Chat Interface Functions
+const selectChat = async (chatId) => {
+    const chatMessages = document.getElementById('chatMessages');
+    const currentChatUser = document.getElementById('currentChatUser');
+    
+    // Load chat history
+    const { data: messages } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('chat_id', chatId)
+        .order('created_at', { ascending: true });
+
+    currentChatUser.textContent = `Chat ${chatId.slice(0, 8)}`;
+    chatMessages.innerHTML = messages?.map(msg => `
+        <div class="message ${msg.sender_type}">
+            <div class="message-content">${msg.content}</div>
+            <div class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</div>
+        </div>
+    `).join('') || '';
+
+    // Set up message input
+    const messageInput = document.getElementById('messageInput');
+    const sendMessage = document.getElementById('sendMessage');
+
+    sendMessage.onclick = async () => {
+        if (!messageInput.value.trim()) return;
+
+        await supabase
+            .from('chat_messages')
+            .insert({
+                chat_id: chatId,
+                content: messageInput.value,
+                sender_type: 'support'
+            });
+
+        messageInput.value = '';
+    };
+};
+
+// Export chat transcript
+const exportChatTranscript = async (chatId, format = 'pdf') => {
+    try {
+        const response = await fetch(`/api/support/export/${format}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ chatId })
+        });
+
+        if (!response.ok) throw new Error('Export failed');
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chat-transcript-${chatId}-${new Date().toISOString()}.${format}`;
+        a.click();
+    } catch (error) {
+        console.error('Failed to export chat transcript:', error);
+    }
+};
+
 // Analytics Functions
 const initAnalytics = () => {
     // User Engagement Chart
@@ -437,6 +630,255 @@ window.exportAnalytics = async (format) => {
     }
 };
 
+// Landing Page Management Functions
+const loadLandingPageContent = async () => {
+    try {
+        const { data: content, error } = await supabase
+            .from('landing_page_content')
+            .select('*')
+            .order('priority', { ascending: true });
+
+        if (error) throw error;
+
+        // Group content by section
+        const marketing = content.filter(item => item.section === 'marketing');
+        const promotions = content.filter(item => item.section === 'promotion');
+        const games = content.filter(item => item.section === 'games');
+
+        // Render each section
+        document.getElementById('marketingItems').innerHTML = renderContentItems(marketing);
+        document.getElementById('promotionItems').innerHTML = renderContentItems(promotions);
+        document.getElementById('gameItems').innerHTML = renderContentItems(games);
+
+    } catch (error) {
+        console.error('Error loading landing page content:', error);
+        alert('Failed to load content. Please try again.');
+    }
+};
+
+const renderContentItems = (items) => {
+    return items.map(item => `
+        <div class="content-item ${item.status}" data-id="${item.id}">
+            <div class="content-preview">
+                ${item.image_url ? `<img src="${item.image_url}" alt="${item.title}">` : ''}
+                <div class="content-info">
+                    <h4>${item.title}</h4>
+                    <p>${item.description || ''}</p>
+                    ${item.link_url ? `<a href="${item.link_url}" target="_blank">${item.link_url}</a>` : ''}
+                </div>
+            </div>
+            <div class="content-actions">
+                <button onclick="editContent('${item.id}')" class="btn-icon">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button onclick="deleteContent('${item.id}')" class="btn-icon">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <button onclick="toggleContentStatus('${item.id}')" class="btn-icon">
+                    <i class="fas fa-${item.status === 'active' ? 'eye' : 'eye-slash'}"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+};
+
+const addNewContent = () => {
+    const modal = document.getElementById('contentEditorModal');
+    const form = document.getElementById('contentForm');
+    const section = document.getElementById('contentSection').value;
+    
+    // Reset form
+    form.reset();
+    document.getElementById('modalTitle').textContent = 'Add New Content';
+    form.dataset.mode = 'add';
+    form.dataset.section = section;
+    
+    modal.style.display = 'block';
+};
+
+const editContent = async (id) => {
+    try {
+        const { data: content, error } = await supabase
+            .from('landing_page_content')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error) throw error;
+
+        const modal = document.getElementById('contentEditorModal');
+        const form = document.getElementById('contentForm');
+
+        // Fill form with content data
+        document.getElementById('contentTitle').value = content.title;
+        document.getElementById('contentDescription').value = content.description || '';
+        document.getElementById('contentLink').value = content.link_url || '';
+        document.getElementById('contentStatus').value = content.status;
+        document.getElementById('startDate').value = content.start_date || '';
+        document.getElementById('endDate').value = content.end_date || '';
+
+        // Show image preview if exists
+        if (content.image_url) {
+            document.getElementById('imagePreview').innerHTML = `
+                <img src="${content.image_url}" alt="Preview">
+            `;
+        }
+
+        form.dataset.mode = 'edit';
+        form.dataset.id = id;
+        modal.style.display = 'block';
+
+    } catch (error) {
+        console.error('Error loading content:', error);
+        alert('Failed to load content. Please try again.');
+    }
+};
+
+const saveContent = async () => {
+    const form = document.getElementById('contentForm');
+    const mode = form.dataset.mode;
+    const id = form.dataset.id;
+
+    try {
+        const contentData = {
+            title: document.getElementById('contentTitle').value,
+            description: document.getElementById('contentDescription').value,
+            link_url: document.getElementById('contentLink').value,
+            status: document.getElementById('contentStatus').value,
+            start_date: document.getElementById('startDate').value || null,
+            end_date: document.getElementById('endDate').value || null,
+            section: mode === 'add' ? form.dataset.section : undefined
+        };
+
+        // Handle image upload
+        const imageFile = document.getElementById('imageUpload').files[0];
+        if (imageFile) {
+            const { data: imageData, error: uploadError } = await supabase.storage
+                .from('landing-page-images')
+                .upload(`${Date.now()}-${imageFile.name}`, imageFile);
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('landing-page-images')
+                .getPublicUrl(imageData.path);
+
+            contentData.image_url = publicUrl;
+        }
+
+        let error;
+        if (mode === 'add') {
+            const { error: insertError } = await supabase
+                .from('landing_page_content')
+                .insert([contentData]);
+            error = insertError;
+        } else {
+            const { error: updateError } = await supabase
+                .from('landing_page_content')
+                .update(contentData)
+                .eq('id', id);
+            error = updateError;
+        }
+
+        if (error) throw error;
+
+        // Update 7Dragon Landing Page
+        await updateSevenDragonContent(contentData);
+
+        closeModal();
+        loadLandingPageContent();
+        alert(`Content ${mode === 'add' ? 'added' : 'updated'} successfully!`);
+
+    } catch (error) {
+        console.error('Error saving content:', error);
+        alert('Failed to save content. Please try again.');
+    }
+};
+
+// Update 7Dragon Landing Page content
+const updateSevenDragonContent = async (contentData) => {
+    try {
+        const section = contentData.section;
+        let updateFunction;
+
+        switch (section) {
+            case CONTENT_TYPES.MARKETING:
+                updateFunction = sevenDragonService.updateContent;
+                break;
+            case CONTENT_TYPES.PROMOTION:
+                updateFunction = sevenDragonService.updatePromotion;
+                break;
+            case CONTENT_TYPES.GAME:
+                updateFunction = sevenDragonService.updateGame;
+                break;
+            default:
+                throw new Error('Invalid content type');
+        }
+
+        await updateFunction(section, contentData);
+        
+        // Trigger deployment after content update
+        await sevenDragonService.triggerDeploy();
+        
+    } catch (error) {
+        console.error('Error updating 7Dragon content:', error);
+        throw error;
+    }
+};
+
+const deleteContent = async (id) => {
+    if (!confirm('Are you sure you want to delete this content?')) return;
+
+    try {
+        const { error } = await supabase
+            .from('landing_page_content')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        loadLandingPageContent();
+        alert('Content deleted successfully!');
+
+    } catch (error) {
+        console.error('Error deleting content:', error);
+        alert('Failed to delete content. Please try again.');
+    }
+};
+
+const toggleContentStatus = async (id) => {
+    try {
+        const { data: content, error: fetchError } = await supabase
+            .from('landing_page_content')
+            .select('status')
+            .eq('id', id)
+            .single();
+
+        if (fetchError) throw fetchError;
+
+        const newStatus = content.status === 'active' ? 'inactive' : 'active';
+
+        const { error: updateError } = await supabase
+            .from('landing_page_content')
+            .update({ status: newStatus })
+            .eq('id', id);
+
+        if (updateError) throw updateError;
+
+        loadLandingPageContent();
+
+    } catch (error) {
+        console.error('Error toggling content status:', error);
+        alert('Failed to update content status. Please try again.');
+    }
+};
+
+const closeModal = () => {
+    document.getElementById('contentEditorModal').style.display = 'none';
+    document.getElementById('contentForm').reset();
+    document.getElementById('imagePreview').innerHTML = '';
+};
+
 // Handle navigation
 document.addEventListener('DOMContentLoaded', () => {
     const menuItems = document.querySelectorAll('.menu-item');
@@ -467,6 +909,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initialize analytics
     initAnalytics();
+    
+    // Load landing page content
+    loadLandingPageContent();
     
     // Load broadcast history
     loadBroadcastHistory();

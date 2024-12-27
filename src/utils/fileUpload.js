@@ -1,136 +1,62 @@
-import { supabase } from '@/supabase/index.mjs'
+import { supabase } from '@/supabase';
 
 /**
- * Upload an image to Supabase storage and create a chat message
- * @param {File} imageFile - The image file to upload
- * @param {string} sessionId - Current chat session ID
- * @param {string} userId - Current user ID
- * @returns {Promise<{ data: any, error: any }>} Upload result
- */
-export async function uploadChatImage(imageFile, sessionId, userId) {
-  try {
-    // First, upload the image to storage
-    const fileName = `${Date.now()}-${imageFile.name}`
-    const filePath = `${userId}/${fileName}`
-    
-    const { error: uploadError } = await supabase.storage
-      .from('chat-images')
-      .upload(filePath, imageFile, {
-        cacheControl: '3600',
-        upsert: false
-      })
-
-    if (uploadError) {
-      console.error('Error uploading image:', uploadError)
-      return { error: uploadError }
-    }
-
-    // Get the public URL for the uploaded image
-    const { data: { publicUrl } } = supabase.storage
-      .from('chat-images')
-      .getPublicUrl(filePath)
-
-    // Create a chat message with the image
-    const { data: message, error: messageError } = await supabase
-      .from('chat_messages')
-      .insert({
-        session_id: sessionId,
-        user_id: userId,
-        message_type: 'image',
-        image_url: publicUrl,
-        file_name: imageFile.name,
-        file_type: imageFile.type,
-        file_size: imageFile.size,
-        metadata: {
-          originalName: imageFile.name,
-          mimeType: imageFile.type,
-          size: imageFile.size,
-          uploadedAt: new Date().toISOString()
-        }
-      })
-      .select()
-      .single()
-
-    if (messageError) {
-      console.error('Error creating message:', messageError)
-      // Try to clean up the uploaded file
-      await supabase.storage
-        .from('chat-images')
-        .remove([filePath])
-      return { error: messageError }
-    }
-
-    return { data: message }
-  } catch (error) {
-    console.error('Unexpected error in uploadChatImage:', error)
-    return { error }
-  }
-}
-
-/**
- * Upload a file to Supabase storage and create a chat message
+ * Upload a file to Supabase storage and return its public URL
  * @param {File} file - The file to upload
  * @param {string} sessionId - Current chat session ID
- * @param {string} userId - Current user ID
- * @returns {Promise<{ data: any, error: any }>} Upload result
+ * @returns {Promise<{ fileUrl: string|null, error: any }>} Upload result
  */
-export async function uploadChatFile(file, sessionId, userId) {
+export async function uploadFile(file, sessionId) {
   try {
-    // First, upload the file to storage
-    const fileName = `${Date.now()}-${file.name}`
-    const filePath = `${userId}/${fileName}`
+    // Generate unique file path
+    const fileName = `${Date.now()}-${file.name}`;
+    const filePath = `chat-files/${sessionId}/${fileName}`;
     
+    // Upload file to storage
     const { error: uploadError } = await supabase.storage
       .from('chat-files')
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: false
-      })
+      });
 
     if (uploadError) {
-      console.error('Error uploading file:', uploadError)
-      return { error: uploadError }
+      console.error('Error uploading file:', uploadError);
+      return { fileUrl: null, error: uploadError };
     }
 
-    // Get the public URL for the uploaded file
+    // Get the public URL
     const { data: { publicUrl } } = supabase.storage
       .from('chat-files')
-      .getPublicUrl(filePath)
+      .getPublicUrl(filePath);
 
-    // Create a chat message with the file
-    const { data: message, error: messageError } = await supabase
-      .from('chat_messages')
-      .insert({
-        session_id: sessionId,
-        user_id: userId,
-        message_type: 'file',
-        file_url: publicUrl,
-        file_name: file.name,
-        file_type: file.type,
-        file_size: file.size,
-        metadata: {
-          originalName: file.name,
-          mimeType: file.type,
-          size: file.size,
-          uploadedAt: new Date().toISOString()
-        }
-      })
-      .select()
-      .single()
-
-    if (messageError) {
-      console.error('Error creating message:', messageError)
-      // Try to clean up the uploaded file
-      await supabase.storage
-        .from('chat-files')
-        .remove([filePath])
-      return { error: messageError }
-    }
-
-    return { data: message }
+    return { fileUrl: publicUrl, error: null };
   } catch (error) {
-    console.error('Unexpected error in uploadChatFile:', error)
-    return { error }
+    console.error('File upload error:', error);
+    return { fileUrl: null, error };
+  }
+}
+
+/**
+ * Delete a file from storage
+ * @param {string} fileUrl - Public URL of the file to delete
+ * @returns {Promise<{ error: any }>} Deletion result
+ */
+export async function deleteFile(fileUrl) {
+  try {
+    // Extract file path from URL
+    const url = new URL(fileUrl);
+    const pathParts = url.pathname.split('/');
+    const filePath = pathParts.slice(pathParts.indexOf('chat-files')).join('/');
+    
+    const { error } = await supabase.storage
+      .from('chat-files')
+      .remove([filePath]);
+      
+    return { error };
+  } catch (error) {
+    console.error('File deletion error:', error);
+    return { error };
   }
 }
 
