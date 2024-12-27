@@ -71,82 +71,103 @@ export default {
 
 <style lang="scss">
 :root {
-  --color-background: #000000;
-  --color-primary: #4B0082;
-  --color-secondary: #008080;
-  --color-accent: #00FF7F;
-  --color-highlight: #00FFFF;
-  --color-text: #FFFFE0;
+  --color-background: #0f1c2c;
+  --color-primary: #1a2a3d;
+  --color-secondary: #52d7b7;
+  --color-accent: #3eaf7c;
+  --color-highlight: #7ce7ff;
+  --color-text: #e0e7ff;
 }
 
 #app {
   font-family: 'Noto Sans Myanmar', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--color-background);
+  background: linear-gradient(135deg, var(--color-background) 0%, var(--color-primary) 100%);
   color: var(--color-text);
   min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
 }
 
 .nav-menu {
-  background-color: var(--color-primary);
-  padding: 1rem;
+  background: rgba(26, 42, 61, 0.9);
+  padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 10px rgba(0, 255, 127, 0.2);
+  box-shadow: 0 2px 15px rgba(82, 215, 183, 0.2);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(82, 215, 183, 0.3);
 }
 
 .nav-link {
   color: var(--color-text);
   text-decoration: none;
   padding: 0.5rem 1rem;
-  border-radius: 4px;
+  border-radius: 20px;
   transition: all 0.3s ease;
-
+  position: relative;
+  
   &:hover {
-    background-color: var(--color-secondary);
-    color: var(--color-highlight);
+    color: var(--color-secondary);
+    background: rgba(82, 215, 183, 0.1);
   }
-
+  
   &.router-link-active {
-    background-color: var(--color-accent);
-    color: var(--color-background);
+    color: var(--color-secondary);
+    background: rgba(82, 215, 183, 0.15);
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 2px;
+      background: var(--color-secondary);
+      border-radius: 2px;
+    }
   }
 }
 
 .login-link {
-  background-color: var(--color-accent);
-  color: var(--color-background);
-  font-weight: bold;
-
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-accent) 100%);
+  color: #fff;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  font-weight: 500;
+  
   &:hover {
-    background-color: var(--color-highlight);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(82, 215, 183, 0.3);
   }
 }
 
 .language-switcher {
   display: flex;
   gap: 0.5rem;
-}
-
-.lang-btn {
-  background: none;
-  border: 1px solid var(--color-text);
-  color: var(--color-text);
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background-color: var(--color-secondary);
-  }
-
-  &.active {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
-    color: var(--color-background);
+  
+  .lang-btn {
+    background: transparent;
+    border: 1px solid rgba(82, 215, 183, 0.3);
+    color: var(--color-text);
+    padding: 0.4rem 0.8rem;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: rgba(82, 215, 183, 0.1);
+    }
+    
+    &.active {
+      background: rgba(82, 215, 183, 0.2);
+      color: var(--color-secondary);
+      border-color: var(--color-secondary);
+    }
   }
 }
 
@@ -155,65 +176,78 @@ export default {
   bottom: 2rem;
   right: 2rem;
   z-index: 1000;
-}
-
-.chat-toggle {
-  background-color: var(--color-accent);
-  color: var(--color-background);
-  border: none;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  font-size: 24px;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 255, 127, 0.3);
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: scale(1.1);
-    background-color: var(--color-highlight);
+  
+  .chat-toggle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-accent) 100%);
+    border: none;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(82, 215, 183, 0.3);
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(82, 215, 183, 0.4);
+    }
+    
+    i {
+      font-size: 1.5rem;
+    }
   }
 }
 
-.chat-open .chat-toggle {
-  background-color: var(--color-secondary);
-}
-
-// Global Animations
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+// Animation for chat window
+.chat-widget {
+  .chat-window {
+    position: fixed;
+    bottom: 80px;
+    right: 2rem;
+    width: 380px;
+    height: 600px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease-out;
+  }
 }
 
 @keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-// Responsive Design
+// Media Queries
 @media (max-width: 768px) {
   .nav-menu {
-    flex-direction: column;
+    padding: 1rem;
+    flex-wrap: wrap;
     gap: 1rem;
   }
-
+  
   .language-switcher {
-    margin-top: 1rem;
+    width: 100%;
+    justify-content: center;
+    order: 2;
   }
-
-  .chat-widget {
-    bottom: 1rem;
-    right: 1rem;
+  
+  .chat-widget .chat-window {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
   }
 }
 </style>

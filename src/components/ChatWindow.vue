@@ -167,53 +167,52 @@ export default {
 
 <style lang="scss" scoped>
 .chat-window {
-  position: fixed;
-  bottom: 80px;
-  right: 20px;
-  width: 350px;
-  height: 500px;
-  background-color: var(--color-background);
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 255, 127, 0.3);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  animation: slideUp 0.3s ease;
+  height: 100vh;
+  background: linear-gradient(135deg, #0f1c2c 0%, #1a2a3d 100%);
+  color: #e0e7ff;
 }
 
 .chat-header {
-  background-color: var(--color-primary);
   padding: 1rem;
+  background: rgba(26, 42, 61, 0.9);
+  border-bottom: 1px solid rgba(82, 215, 183, 0.3);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--color-accent);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .chat-title {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
 
   .chat-logo {
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
+    border: 2px solid #52d7b7;
   }
 
   h3 {
+    color: #52d7b7;
     margin: 0;
-    color: var(--color-text);
+    font-size: 1.5rem;
   }
 }
 
 .chat-status {
-  font-size: 0.8rem;
-  color: var(--color-text);
-  opacity: 0.7;
-
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  background: rgba(82, 215, 183, 0.1);
+  border: 1px solid rgba(82, 215, 183, 0.3);
+  
   &.connected {
-    color: var(--color-accent);
+    background: rgba(82, 215, 183, 0.2);
+    color: #52d7b7;
   }
 }
 
@@ -224,155 +223,137 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-
+  
   &::-webkit-scrollbar {
     width: 6px;
   }
-
+  
   &::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(26, 42, 61, 0.9);
   }
-
+  
   &::-webkit-scrollbar-thumb {
-    background: var(--color-secondary);
+    background: #52d7b7;
     border-radius: 3px;
   }
 }
 
 .message {
   max-width: 80%;
-  animation: fadeIn 0.3s ease;
-
+  padding: 1rem;
+  border-radius: 12px;
+  position: relative;
+  animation: fadeIn 0.3s ease-out;
+  
   &.user-message {
     align-self: flex-end;
+    background: linear-gradient(135deg, #52d7b7 0%, #3eaf7c 100%);
+    color: #fff;
     
-    .message-content {
-      background-color: var(--color-accent);
-      color: var(--color-background);
-      border-radius: 12px 12px 0 12px;
+    .message-time {
+      color: rgba(255, 255, 255, 0.8);
     }
   }
-
+  
   &.bot-message {
     align-self: flex-start;
+    background: rgba(26, 42, 61, 0.9);
+    border: 1px solid rgba(82, 215, 183, 0.3);
     
-    .message-content {
-      background-color: var(--color-secondary);
-      color: var(--color-text);
-      border-radius: 12px 12px 12px 0;
+    .message-time {
+      color: rgba(224, 231, 255, 0.6);
     }
   }
 }
 
 .message-content {
-  padding: 0.75rem 1rem;
-  
   p {
-    margin: 0;
-    line-height: 1.4;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.5;
   }
 }
 
 .message-time {
-  display: block;
-  font-size: 0.7rem;
-  margin-top: 0.25rem;
-  opacity: 0.7;
-}
-
-.typing-indicator {
-  display: flex;
-  gap: 0.3rem;
-  padding: 0.5rem;
-  
-  span {
-    width: 6px;
-    height: 6px;
-    background-color: var(--color-text);
-    border-radius: 50%;
-    animation: bounce 1s infinite;
-    
-    &:nth-child(2) { animation-delay: 0.2s; }
-    &:nth-child(3) { animation-delay: 0.4s; }
-  }
+  font-size: 0.8rem;
+  opacity: 0.8;
 }
 
 .chat-input {
   padding: 1rem;
+  background: rgba(26, 42, 61, 0.9);
+  border-top: 1px solid rgba(82, 215, 183, 0.3);
   display: flex;
-  gap: 0.5rem;
-  background-color: rgba(var(--color-primary), 0.1);
-  border-top: 1px solid rgba(var(--color-accent), 0.2);
-
+  gap: 1rem;
+  align-items: flex-end;
+  
   textarea {
     flex: 1;
-    background-color: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(var(--color-accent), 0.3);
-    border-radius: 20px;
-    padding: 0.5rem 1rem;
-    color: var(--color-text);
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: 1px solid rgba(82, 215, 183, 0.3);
+    background: rgba(15, 28, 44, 0.8);
+    color: #e0e7ff;
     resize: none;
-    max-height: 100px;
+    min-height: 20px;
+    max-height: 150px;
     transition: all 0.3s ease;
-
+    
     &:focus {
       outline: none;
-      border-color: var(--color-accent);
-      background-color: rgba(255, 255, 255, 0.15);
+      border-color: #52d7b7;
+      background: rgba(15, 28, 44, 0.95);
+    }
+    
+    &::placeholder {
+      color: rgba(224, 231, 255, 0.5);
     }
   }
 }
 
 .send-button {
-  background-color: var(--color-accent);
-  color: var(--color-background);
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
   border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: linear-gradient(135deg, #52d7b7 0%, #3eaf7c 100%);
+  color: white;
   cursor: pointer;
   transition: all 0.3s ease;
-
+  
   &:hover:not(:disabled) {
-    transform: scale(1.1);
-    background-color: var(--color-highlight);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(82, 215, 183, 0.3);
   }
-
+  
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
 }
 
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
-
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+.typing-indicator {
+  display: flex;
+  gap: 0.3rem;
+  padding: 1rem;
+  
+  span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #52d7b7;
+    animation: bounce 1.4s infinite ease-in-out;
+    
+    &:nth-child(1) { animation-delay: -0.32s; }
+    &:nth-child(2) { animation-delay: -0.16s; }
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-// Mobile Responsive
-@media (max-width: 768px) {
-  .chat-window {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 0;
-  }
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
 }
 </style>
