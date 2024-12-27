@@ -1,7 +1,28 @@
-import { supabase } from '../supabase/index.js'
-import { validateNickname } from './userProfile.js'
+const { validateNickname } = require('./userProfile.js')
+const { createAdminProfile, supabaseAdmin } = require('../../scripts/adminUtils.js')
 
-export const createInitialAdmin = async (email, password, username, nickname) => {
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+const getExistingUser = async (email) => {
+  const { data, error } = await supabaseAdmin.auth.admin.listUsers()
+  if (error) throw error
+  return data.users.find(user => user.email === email)
+}
+
+const waitForUser = async (userId, maxAttempts = 5) => {
+  for (let i = 0; i < maxAttempts; i++) {
+    const { data } = await supabaseAdmin.auth.admin.getUserById(userId)
+
+    if (data?.user) return true
+    if (i < maxAttempts - 1) {
+      console.log(`Attempt ${i + 1}/${maxAttempts} - Waiting for user creation...`)
+      await delay(1000) // Wait 1 second between attempts
+    }
+  }
+  return false
+}
+
+const createInitialAdmin = async (email, password, username, nickname) => {
   try {
     // Validate nickname
     const validation = validateNickname(nickname)
@@ -12,46 +33,82 @@ export const createInitialAdmin = async (email, password, username, nickname) =>
       }
     }
 
-    // Create admin user
-    const { user, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password
-    })
+    // Check if user already exists
+    console.log('Checking if user already exists...')
+    const existingUser = await getExistingUser(email)
+    let userId
 
-    if (signUpError) throw signUpError
+    if (existingUser) {
+      console.log('User already exists, updating metadata...')
+      userId = existingUser.id
 
-    // Create admin profile
-    const { error: profileError } = await supabase
-      .from('user_profiles')
-      .insert({
-        user_id: user.id,
-        username,
-        nickname,
-        role: 'admin',
-        created_at: new Date().toISOString()
+      // Update user metadata
+      const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+        user_metadata: {
+          username,
+          nickname,
+          role: 'admin'
+        }
       })
 
-    if (profileError) throw profileError
-
-    // Create initial notification for admin
-    const { error: notificationError } = await supabase
-      .from('admin_notifications')
-      .insert({
-        type: 'welcome',
-        message: `Welcome ${nickname}! You can manage your chat application from here.`,
-        user_id: user.id,
-        created_at: new Date().toISOString()
+      if (updateError) {
+        console.error('Error updating user metadata:', updateError)
+        throw updateError
+      }
+    } else {
+      console.log('Creating new admin user...')
+      // Create admin user using admin client
+      const { data, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          username,
+          nickname,
+          role: 'admin'
+        }
       })
 
-    if (notificationError) throw notificationError
+      if (signUpError) {
+        console.error('Signup error:', signUpError)
+        throw signUpError
+      }
+
+      if (!data?.user?.id) {
+        console.error('No user data returned:', data)
+        throw new Error('Failed to create user - no user ID returned')
+      }
+
+      userId = data.user.id
+      console.log('User created successfully:', userId)
+
+      // Wait for user to be available in the database
+      console.log('Waiting for user to be available in the database...')
+      const userExists = await waitForUser(userId)
+      
+      if (!userExists) {
+        throw new Error('Timeout waiting for user to be created in the database')
+      }
+
+      console.log('User is now available in the database')
+    }
+
+    // Create admin profile using service role client
+    const { success, error } = await createAdminProfile(userId, username, nickname)
+    
+    if (!success) {
+      throw error || new Error('Failed to create admin profile')
+    }
+
+    console.log('Admin profile and notification created successfully')
 
     return {
       success: true,
-      user,
-      message: 'Admin user created successfully with initial notification'
+      userId,
+      message: 'Admin user created/updated successfully with initial notification'
     }
   } catch (error) {
-    console.error('Error creating initial admin:', error)
+    console.error('Error creating admin:', error)
     return {
       success: false,
       error: error.message
@@ -59,30 +116,4 @@ export const createInitialAdmin = async (email, password, username, nickname) =>
   }
 }
 
-/**
- * Example usage:
- * 
- * // Create admin with nickname
- * const result = await createInitialAdmin(
- *   'admin@example.com',
- *   'password123',
- *   'admin',
- *   'Super Admin'
- * )
- * 
- * // Update existing admin nickname
- * import { updateUserNickname } from './userProfile'
- * const updateResult = await updateUserNickname(userId, 'New Nickname')
- * 
- * // Get admins without nicknames
- * import { getAdminsWithoutNicknames } from './userProfile'
- * const { admins } = await getAdminsWithoutNicknames()
- * 
- * // Update multiple admin nicknames
- * import { updateAdminNicknames } from './userProfile'
- * const updates = [
- *   { userId: 'id1', nickname: 'Admin 1' },
- *   { userId: 'id2', nickname: 'Admin 2' }
- * ]
- * const result = await updateAdminNicknames(updates)
- */
+module.exports = { createInitialAdmin }

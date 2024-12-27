@@ -1,17 +1,23 @@
-import { createClient } from '@supabase/supabase-js'
+const { createClient } = require('@supabase/supabase-js')
+const dotenv = require('dotenv')
 
-const supabaseUrl = process.env.VUE_APP_SUPABASE_URL || 'https://xnujjoarvinvztccwrye.supabase.co'
-const supabaseKey = process.env.VUE_APP_SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhudWpqb2Fydmludnp0Y2N3cnllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUyNzc1OTAsImV4cCI6MjA1MDg1MzU5MH0.pyxlMZkDM53RWaPHc4GhsoKdaGDqbkn2p7b1cXF3Wgs'
+// Load environment variables
+dotenv.config()
 
-export const supabase = createClient(supabaseUrl, supabaseKey, {
+const supabaseUrl = process.env.VUE_APP_SUPABASE_URL
+const supabaseKey = process.env.VUE_APP_SUPABASE_KEY
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Supabase URL and Key are required. Please check your .env file.')
+}
+
+// Create Supabase client with auth configuration
+const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
-    persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: true
-  },
-  realtime: {
-    params: {
-      eventsPerSecond: 10
-    }
+    persistSession: false,
+    detectSessionInUrl: false
   }
 })
+
+module.exports = { supabase }

@@ -1,22 +1,22 @@
-import { createClient } from '@supabase/supabase-js'
+const { createClient } = require('@supabase/supabase-js')
+const dotenv = require('dotenv')
+
+// Load environment variables
+dotenv.config()
 
 const supabaseUrl = process.env.VUE_APP_SUPABASE_URL
-const supabaseAnonKey = process.env.VUE_APP_SUPABASE_KEY
+const supabaseKey = process.env.VUE_APP_SUPABASE_KEY
 
-// Create Supabase client with realtime configuration
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  realtime: {
-    params: {
-      eventsPerSecond: 10
-    }
-  },
-  db: {
-    schema: 'public'
-  },
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Supabase URL and Key are required. Please check your .env file.')
+}
+
+// Create Supabase client with auth configuration
+const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
-    persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: true
+    persistSession: false,
+    detectSessionInUrl: false
   }
 })
 
@@ -56,7 +56,7 @@ const enableRealtimeForTables = async () => {
 enableRealtimeForTables()
 
 // Export reusable database functions
-export const db = {
+const db = {
   /**
    * Execute a stored function
    * @param {string} functionName - Name of the function to execute
@@ -141,7 +141,7 @@ export const db = {
 }
 
 // Export helper functions
-export const helpers = {
+const helpers = {
   /**
    * Subscribe to realtime updates for a specific record
    * @param {string} table - Table name
@@ -184,3 +184,9 @@ export const helpers = {
 
 // Set up periodic cleanup of typing indicators
 setInterval(helpers.cleanupTypingIndicators, 5000)
+
+module.exports = { 
+  supabase,
+  db,
+  helpers
+}

@@ -1,33 +1,37 @@
-import { supabase } from '../supabase/index.js'
+const supabase = require('../supabase/index.js')
 
 /**
  * Validate nickname
  * @param {string} nickname - Nickname to validate
  * @returns {Object} - Validation result
  */
-export const validateNickname = (nickname) => {
-  if (!nickname || typeof nickname !== 'string') {
-    return { valid: false, error: 'Nickname is required' }
-  }
-
-  if (nickname.length < 2) {
-    return { valid: false, error: 'Nickname must be at least 2 characters long' }
-  }
-
-  if (nickname.length > 30) {
-    return { valid: false, error: 'Nickname must be less than 30 characters' }
-  }
-
-  // Allow letters, numbers, spaces, and common special characters
-  const nicknameRegex = /^[a-zA-Z0-9\s\-_!@#$%^&*()+=]{2,30}$/
-  if (!nicknameRegex.test(nickname)) {
-    return { 
-      valid: false, 
-      error: 'Nickname can only contain letters, numbers, spaces, and common special characters' 
+const validateNickname = (nickname) => {
+  if (!nickname) {
+    return {
+      valid: false,
+      error: 'Nickname is required'
     }
   }
 
-  return { valid: true }
+  if (nickname.length < 2 || nickname.length > 50) {
+    return {
+      valid: false,
+      error: 'Nickname must be between 2 and 50 characters'
+    }
+  }
+
+  // Allow letters, numbers, spaces, and common punctuation
+  const nicknameRegex = /^[a-zA-Z0-9\s\-_.,'()]+$/
+  if (!nicknameRegex.test(nickname)) {
+    return {
+      valid: false,
+      error: 'Nickname can only contain letters, numbers, spaces, and basic punctuation'
+    }
+  }
+
+  return {
+    valid: true
+  }
 }
 
 /**
@@ -36,7 +40,7 @@ export const validateNickname = (nickname) => {
  * @param {string} nickname - New nickname
  * @returns {Promise<Object>} - Update result
  */
-export const updateUserNickname = async (userId, nickname) => {
+const updateUserNickname = async (userId, nickname) => {
   try {
     // Validate nickname
     const validation = validateNickname(nickname)
@@ -75,7 +79,7 @@ export const updateUserNickname = async (userId, nickname) => {
  * @param {Array<{userId: string, nickname: string}>} adminUpdates - List of admin updates
  * @returns {Promise<Object>} - Update results
  */
-export const updateAdminNicknames = async (adminUpdates) => {
+const updateAdminNicknames = async (adminUpdates) => {
   try {
     const results = []
     const errors = []
@@ -112,7 +116,7 @@ export const updateAdminNicknames = async (adminUpdates) => {
  * @param {Object} user - User profile object
  * @returns {string} - Display name
  */
-export const getUserDisplayName = (user) => {
+const getUserDisplayName = (user) => {
   return user?.nickname || user?.username || 'Anonymous'
 }
 
@@ -120,7 +124,7 @@ export const getUserDisplayName = (user) => {
  * Get all admin users without nicknames
  * @returns {Promise<Object>} - List of admin users
  */
-export const getAdminsWithoutNicknames = async () => {
+const getAdminsWithoutNicknames = async () => {
   try {
     const { data, error } = await supabase
       .from('user_profiles')
@@ -141,4 +145,12 @@ export const getAdminsWithoutNicknames = async () => {
       error: error.message
     }
   }
+}
+
+module.exports = { 
+  validateNickname, 
+  updateUserNickname, 
+  updateAdminNicknames, 
+  getUserDisplayName, 
+  getAdminsWithoutNicknames 
 }

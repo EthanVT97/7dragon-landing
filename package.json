@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node server.cjs",
+    "serve": "vue-cli-service serve",
     "dev": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "postinstall": "npm run build"
+    "postinstall": "npm run build",
+    "init-admin": "node scripts/initAdmin.js"
   },
   "dependencies": {
     "@babel/core": "^7.23.6",
@@ -26,6 +27,7 @@
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "dialogflow": "^1.2.0",
+    "dotenv": "^16.4.7",
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.19.2",
     "express": "^4.21.2",
