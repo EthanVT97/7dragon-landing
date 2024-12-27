@@ -5,6 +5,8 @@ services:
     buildCommand: npm install && npm run build
     startCommand: npm start
     envVars:
+      - key: NODE_ENV
+        value: production
       - key: VUE_APP_SUPABASE_URL
         value: https://xnujjoarvinvztccwrye.supabase.co
       - key: VUE_APP_SUPABASE_KEY

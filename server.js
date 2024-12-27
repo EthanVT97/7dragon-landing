@@ -16,11 +16,17 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      connectSrc: ["'self'", "https://xnujjoarvinvztccwrye.supabase.co", "wss://xnujjoarvinvztccwrye.supabase.co"],
+      connectSrc: ["'self'", 
+        "https://xnujjoarvinvztccwrye.supabase.co", 
+        "wss://xnujjoarvinvztccwrye.supabase.co",
+        "https://fonts.googleapis.com",
+        "https://fonts.gstatic.com"
+      ],
       imgSrc: ["'self'", "data:", "https:"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      upgradeInsecureRequests: null
     },
   },
 }));
@@ -40,7 +46,7 @@ app.use(cors());
 // Compression
 app.use(compression());
 
-// Serve static files
+// Serve static files from the Vue app build directory
 app.use(express.static(path.join(__dirname, 'dist')));
 
 // Handle SPA routing
