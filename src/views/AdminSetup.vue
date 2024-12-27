@@ -38,7 +38,7 @@ export default {
     const runSetup = async () => {
       isLoading.value = true
       try {
-        const { user, error } = await createInitialAdmin()
+        const { error } = await createInitialAdmin()
         if (error) {
           console.error('Setup failed:', error)
           alert('Failed to create admin user. Check console for details.')

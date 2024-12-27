@@ -42,7 +42,7 @@ export default createStore({
     }
   },
   actions: {
-    async createAdminUser({ }, { username, password, email, role = 'admin' }) {
+    async createAdminUser(context, { username, password, email, role = 'admin' }) {
       try {
         // First, create the auth user
         const { data: { user }, error: authError } = await supabase.auth.signUp({
@@ -96,7 +96,7 @@ export default createStore({
       }
     },
 
-    async updateAdminUser({ }, { userId, updates }) {
+    async updateAdminUser(context, { userId, updates }) {
       try {
         const { error } = await supabase
           .from('admin_users')
@@ -112,7 +112,7 @@ export default createStore({
       }
     },
 
-    async deleteAdminUser({ }, userId) {
+    async deleteAdminUser(context, userId) {
       try {
         // Delete from admin_users table
         const { error: profileError } = await supabase
