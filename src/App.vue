@@ -33,18 +33,45 @@
 </template>
 
 <script>
-import ChatWindow from '@/components/ChatWindow.vue'
+import { computed, onMounted } from 'vue'
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import LiveChat from '@/components/LiveChat.vue'
-import { mapState, mapActions, mapGetters } from 'vuex'
+import ChatWindow from '@/components/ChatWindow.vue'
 
 export default {
   name: 'App',
   components: {
-    ChatWindow,
-    LiveChat
+    LiveChat,
+    ChatWindow
   },
-  data() {
-    return {
+  setup() {
+    const store = useStore()
+    const router = useRouter()
+    
+    const isDarkMode = computed(() => store.state.isDarkMode)
+    const isAuthenticated = computed(() => store.getters.isAuthenticated)
+    const isAdmin = computed(() => {
+      const user = store.getters.currentUser
+      return user && user.role === 'admin'
+    })
+    const isAdminRoute = computed(() => router.currentRoute.value.path.startsWith('/admin'))
+    
+    onMounted(async () => {
+      try {
+        const { error } = await store.dispatch('checkSession')
+        if (error) {
+          console.error('Session check failed:', error)
+          if (router.currentRoute.value.meta.requiresAuth) {
+            router.push('/login')
+          }
+        }
+      } catch (err) {
+        console.error('Failed to check session:', err)
+      }
+    })
+    
+    const data = {
       isChatOpen: false,
       languages: [
         { code: 'my', name: 'မြန်မာ' },
@@ -52,32 +79,24 @@ export default {
         { code: 'en', name: 'ENG' }
       ]
     }
-  },
-  computed: {
-    ...mapState(['isDarkMode', 'currentLanguage', 'isConnected']),
-    ...mapGetters(['isAuthenticated', 'currentUser']),
-    isAdmin() {
-      return this.currentUser && this.currentUser.role === 'admin'
-    },
-    isAdminRoute() {
-      return this.$route.path.startsWith('/admin')
+    
+    const methods = {
+      toggleChat() {
+        data.isChatOpen = !data.isChatOpen
+      },
+      changeLanguage(lang) {
+        store.dispatch('setLanguage', lang)
+        this.$i18n.locale = lang
+      }
     }
-  },
-  methods: {
-    ...mapActions(['setLanguage', 'testConnection']),
-    toggleChat() {
-      this.isChatOpen = !this.isChatOpen
-    },
-    changeLanguage(lang) {
-      this.setLanguage(lang)
-      this.$i18n.locale = lang
-    }
-  },
-  async created() {
-    // Test Supabase connection when app starts
-    const { error } = await this.testConnection()
-    if (error) {
-      console.error('Failed to connect to Supabase:', error)
+    
+    return {
+      ...data,
+      isDarkMode,
+      isAuthenticated,
+      isAdmin,
+      isAdminRoute,
+      ...methods
     }
   }
 }

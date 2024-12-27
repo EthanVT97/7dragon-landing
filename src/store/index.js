@@ -171,41 +171,60 @@ export default createStore({
     
     async login({ commit }, { email, password }) {
       try {
-        // Sign in with email and password
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password
         })
-        
+
         if (error) throw error
 
-        // Get user role from profiles table with error handling
-        const { data: profiles, error: profileError } = await supabase
+        // Get user profile with role
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('role, username')
+          .select('*')
           .eq('id', data.user.id)
-          .limit(1)
+          .single()
 
-        if (profileError) {
-          console.error('Profile fetch error:', profileError)
-          throw new Error('Failed to fetch user profile')
-        }
+        if (profileError) throw profileError
 
-        if (!profiles || profiles.length === 0) {
-          throw new Error('User profile not found')
-        }
-
-        // Set user with role information
+        // Set user with profile data
         const userWithProfile = {
           ...data.user,
-          role: profiles[0].role,
-          username: profiles[0].username
+          ...profile
         }
-        
+
         commit('SET_USER', userWithProfile)
         return { user: userWithProfile }
       } catch (error) {
         console.error('Login error:', error)
+        return { error }
+      }
+    },
+
+    async checkSession({ commit }) {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (error) throw error
+        
+        if (session?.user) {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single()
+
+          if (profileError) throw profileError
+
+          commit('SET_USER', {
+            ...session.user,
+            ...profile
+          })
+        }
+        
+        return { session }
+      } catch (error) {
+        console.error('Session check error:', error)
         return { error }
       }
     },
