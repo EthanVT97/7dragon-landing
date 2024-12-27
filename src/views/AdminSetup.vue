@@ -19,7 +19,7 @@
           <h2>Setup Complete!</h2>
           <p>Admin user has been created successfully.</p>
           <p>You can now log in with the credentials above.</p>
-          <router-link to="/login" class="login-link">Go to Login</router-link>
+          <button @click="goToLogin" class="login-link">Go to Login</button>
         </div>
       </div>
     </div>
@@ -29,10 +29,12 @@
 <script>
 import { ref } from 'vue'
 import { createInitialAdmin } from '@/utils/createInitialAdmin'
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'AdminSetup',
   setup() {
+    const router = useRouter()
     const isLoading = ref(false)
     const setupComplete = ref(false)
     const errorMessage = ref('')
@@ -45,26 +47,35 @@ export default {
         const { error } = await createInitialAdmin()
         if (error) {
           console.error('Setup failed:', error)
-          errorMessage.value = error.message || 'Failed to create admin user'
-          if (error.details) {
-            console.error('Error details:', error.details)
+          if (error.type === 'ADMIN_EXISTS') {
+            setupComplete.value = true
+          } else {
+            errorMessage.value = error.message || 'Failed to create admin user'
+            if (error.details) {
+              console.error('Error details:', error.details)
+            }
           }
         } else {
           setupComplete.value = true
         }
       } catch (error) {
         console.error('Unexpected error:', error)
-        errorMessage.value = 'An unexpected error occurred'
+        errorMessage.value = 'An unexpected error occurred. Please check your environment configuration.'
       } finally {
         isLoading.value = false
       }
+    }
+
+    const goToLogin = () => {
+      router.push('/login')
     }
 
     return {
       isLoading,
       setupComplete,
       errorMessage,
-      runSetup
+      runSetup,
+      goToLogin
     }
   }
 }
