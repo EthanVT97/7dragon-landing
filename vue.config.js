@@ -13,7 +13,8 @@ module.exports = defineConfig({
   },
   chainWebpack: config => {
     config.plugin('html').tap(args => {
-      args[0].title = '18K Chat'
+      args[0].title = '၁၈ကရက် ချက်'
+      args[0].favicon = 'public/18klogo.jpg'
       return args
     })
   }
