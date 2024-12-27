@@ -43,6 +43,10 @@ app.use(helmet({
       mediaSrc: ["'self'", "blob:", "data:"],
       workerSrc: ["'self'", "blob:"],
       frameSrc: ["'self'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+      manifestSrc: ["'self'"],
+      objectSrc: ["'none'"],
       upgradeInsecureRequests: null
     },
   },
