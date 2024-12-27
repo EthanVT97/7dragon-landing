@@ -3,7 +3,7 @@ services:
     name: 18k-chat
     env: node
     buildCommand: npm install && npm run build
-    startCommand: npm run serve
+    startCommand: npm start
     envVars:
       - key: VUE_APP_SUPABASE_URL
         value: https://xnujjoarvinvztccwrye.supabase.co
@@ -11,3 +11,5 @@ services:
         value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhudWpqb2Fydmludnp0Y2N3cnllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUyNzc1OTAsImV4cCI6MjA1MDg1MzU5MH0.pyxlMZkDM53RWaPHc4GhsoKdaGDqbkn2p7b1cXF3Wgs
       - key: NODE_VERSION
         value: 18.0.0
+      - key: PORT
+        value: 3000
