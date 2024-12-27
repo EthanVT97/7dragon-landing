@@ -529,6 +529,323 @@ body[data-lang="th"] .my {
 }
 
 /* Admin Login Styles */
+.admin-body {
+    background: linear-gradient(135deg, var(--midnight-black), var(--deep-purple));
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-login-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+}
+
+.login-box {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+}
+
+.login-header h2 {
+    color: var(--moonlight-white);
+    font-size: 1.8rem;
+    margin: 0;
+}
+
+.password-input {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--moonlight-white);
+    cursor: pointer;
+}
+
+.btn-login {
+    width: 100%;
+    padding: 1rem;
+    background: var(--neon-teal);
+    color: var(--midnight-black);
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-login:hover {
+    background: var(--vibrant-green);
+    transform: translateY(-2px);
+}
+
+.login-footer {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.back-to-home {
+    color: var(--moonlight-white);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.3s ease;
+}
+
+.back-to-home:hover {
+    color: var(--neon-teal);
+}
+
+/* Admin Dashboard Styles */
+.admin-dashboard-body {
+    background: var(--midnight-black);
+    min-height: 100vh;
+}
+
+.admin-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+    z-index: 1000;
+}
+
+.admin-logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.admin-logo img {
+    height: 40px;
+    width: auto;
+}
+
+.admin-logo span {
+    color: var(--moonlight-white);
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.admin-nav {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.admin-user {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--moonlight-white);
+}
+
+.btn-logout {
+    background: transparent;
+    border: 1px solid var(--neon-teal);
+    color: var(--neon-teal);
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-logout:hover {
+    background: var(--neon-teal);
+    color: var(--midnight-black);
+}
+
+.admin-sidebar {
+    position: fixed;
+    left: 0;
+    top: 60px;
+    bottom: 0;
+    width: 250px;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 2rem 0;
+}
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 2rem;
+    color: var(--moonlight-white);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.menu-item:hover,
+.menu-item.active {
+    background: rgba(0, 255, 127, 0.1);
+    color: var(--neon-teal);
+}
+
+.notification-badge {
+    position: absolute;
+    right: 2rem;
+    background: var(--neon-teal);
+    color: var(--midnight-black);
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.8rem;
+}
+
+.admin-main {
+    margin-left: 250px;
+    margin-top: 60px;
+    padding: 2rem;
+}
+
+.admin-panel {
+    display: none;
+}
+
+.admin-panel.active {
+    display: block;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.panel-header h2 {
+    color: var(--moonlight-white);
+    margin: 0;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stat-card i {
+    font-size: 2rem;
+    color: var(--neon-teal);
+}
+
+.stat-content h3 {
+    color: var(--moonlight-white);
+    margin: 0;
+    font-size: 1rem;
+}
+
+.stat-content p {
+    color: var(--neon-teal);
+    margin: 0.5rem 0 0;
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.charts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+.chart-card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 10px;
+}
+
+.chart-card h3 {
+    color: var(--moonlight-white);
+    margin: 0 0 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .admin-sidebar {
+        width: 60px;
+    }
+
+    .menu-item span {
+        display: none;
+    }
+
+    .admin-main {
+        margin-left: 60px;
+    }
+
+    .notification-badge {
+        right: 0.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-header {
+        padding: 0 1rem;
+    }
+
+    .admin-logo span {
+        display: none;
+    }
+
+    .charts-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Admin Login Styles */
 .admin-login {
     display: flex;
     justify-content: center;
@@ -744,5 +1061,140 @@ body[data-lang="th"] .my {
 
     .data-table {
         font-size: 0.9rem;
+    }
+}
+
+/* Header Styles */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+}
+
+.logo img {
+    height: 40px;
+    width: auto;
+}
+
+.nav-menu ul {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+}
+
+.nav-menu a {
+    color: var(--moonlight-white);
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.nav-menu a:hover,
+.nav-menu a.active {
+    color: var(--neon-teal);
+}
+
+/* Chat Button */
+.chat-button {
+    position: fixed;
+    top: 100px;
+    right: 30px;
+    background: var(--neon-teal);
+    color: var(--midnight-black);
+    padding: 1rem;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 999;
+    box-shadow: 0 4px 15px rgba(0, 255, 127, 0.3);
+}
+
+.chat-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 255, 127, 0.4);
+}
+
+.chat-button i {
+    font-size: 1.2rem;
+}
+
+/* Footer Styles */
+.footer {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 1.5rem 0;
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.footer-content {
+    color: var(--moonlight-white);
+    font-size: 0.9rem;
+}
+
+/* Chat Interface */
+.chat-interface {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    width: 350px;
+    height: 500px;
+    background: var(--midnight-black);
+    border-radius: 15px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.chat-interface.hidden {
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header {
+        padding: 1rem;
+    }
+
+    .nav-menu ul {
+        gap: 1rem;
+    }
+
+    .nav-menu a {
+        font-size: 1rem;
+    }
+
+    .chat-button {
+        top: auto;
+        bottom: 80px;
+        right: 20px;
+        padding: 0.8rem;
+    }
+
+    .chat-interface {
+        width: 100%;
+        height: calc(100vh - 160px);
+        bottom: 80px;
+        right: 0;
     }
 }

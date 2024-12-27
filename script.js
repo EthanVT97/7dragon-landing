@@ -1,25 +1,41 @@
-import { initChat, startChat } from './chat.js';
+import { initChat } from './chat.js';
 import { initAdmin } from './admin.js';
 
-// Language switching functionality
-function changeLanguage(lang) {
-    document.body.setAttribute('data-lang', lang);
-    localStorage.setItem('preferred-language', lang);
-}
+// Chat Interface Functions
+window.startChat = () => {
+    const chatInterface = document.getElementById('chat-interface');
+    chatInterface.classList.remove('hidden');
+};
+
+window.closeChat = () => {
+    const chatInterface = document.getElementById('chat-interface');
+    chatInterface.classList.add('hidden');
+};
 
 // Initialize everything when the DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
-    // Set initial language
-    const savedLang = localStorage.getItem('preferred-language') || 'en';
-    changeLanguage(savedLang);
-
     // Initialize chat functionality
     await initChat();
 
     // Initialize admin panel
     await initAdmin();
 
-    // Make startChat function available globally
-    window.startChat = startChat;
-    window.changeLanguage = changeLanguage;
+    // Add scroll event listener for header
+    window.addEventListener('scroll', () => {
+        const header = document.querySelector('.header');
+        if (window.scrollY > 50) {
+            header.style.background = 'rgba(0, 0, 0, 0.9)';
+        } else {
+            header.style.background = 'rgba(0, 0, 0, 0.8)';
+        }
+    });
+
+    // Navigation active state
+    const navLinks = document.querySelectorAll('.nav-menu a');
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            navLinks.forEach(l => l.classList.remove('active'));
+            e.target.classList.add('active');
+        });
+    });
 });
