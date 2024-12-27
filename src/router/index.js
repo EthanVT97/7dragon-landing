@@ -42,6 +42,11 @@ const routes = [
     meta: { requiresAuth: true, adminOnly: true },
     children: [
       {
+        path: '',
+        name: 'AdminDashboard',
+        component: () => import('@/views/admin/Dashboard.vue')
+      },
+      {
         path: 'content',
         name: 'AdminContent',
         component: AdminContent

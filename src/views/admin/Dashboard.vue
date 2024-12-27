@@ -19,6 +19,7 @@
         Admin Users
       </router-link>
     </nav>
+    <router-view></router-view>
     <div class="stats-grid">
       <div class="stat-card">
         <h3>Total Chats</h3>
