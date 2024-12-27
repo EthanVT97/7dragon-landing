@@ -47,10 +47,27 @@ async function createInitialAdmin() {
 
     // Check if the auth user exists first
     const { data: { users } } = await supabase.auth.admin.listUsers()
-    const existingAuthUser = users?.find(u => u.email === 'admin@18kchat.com')
+    
+    if (!users) {
+      console.error('Failed to list auth users')
+      return { error: { message: 'Failed to check existing auth users' } }
+    }
+
+    const existingAuthUser = users.find(u => u.email === 'admin@18kchat.com')
 
     if (existingAuthUser) {
       console.log('Auth user exists, using existing user')
+      
+      // Check if the user has the correct role
+      const { data: { user: updatedUser }, error: updateError } = await supabase.auth.admin.updateUserById(
+        existingAuthUser.id,
+        { user_metadata: { role: 'super_admin' } }
+      )
+
+      if (updateError) {
+        console.error('Error updating auth user role:', updateError)
+      }
+
       // Use the existing auth user
       const { error: profileError } = await supabase
         .from('admin_users')
@@ -67,7 +84,7 @@ async function createInitialAdmin() {
         return { error: { message: 'Failed to create admin profile', details: profileError } }
       }
 
-      return { user: existingAuthUser }
+      return { user: updatedUser || existingAuthUser }
     }
 
     console.log('Creating new auth user')
@@ -95,7 +112,7 @@ async function createInitialAdmin() {
     console.log('Auth user created, creating admin profile')
 
     // Create the admin profile
-    const { error: profileError } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from('admin_users')
       .insert([{
         user_id: user.id,
@@ -104,6 +121,8 @@ async function createInitialAdmin() {
         role: 'super_admin',
         created_at: new Date().toISOString()
       }])
+      .select()
+      .single()
 
     if (profileError) {
       console.error('Error creating admin profile:', profileError)
@@ -114,7 +133,7 @@ async function createInitialAdmin() {
       return { error: { message: 'Failed to create admin profile', details: profileError } }
     }
 
-    console.log('Admin user created successfully')
+    console.log('Admin user created successfully:', { user, profile })
     return { user }
   } catch (error) {
     console.error('Unexpected error in createInitialAdmin:', error)
