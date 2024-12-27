@@ -48,41 +48,52 @@ body {
 
 /* Header */
 .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    padding: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 100;
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1000;
 }
 
-.logo {
+.site-title {
     display: flex;
     align-items: center;
-    gap: 10px;
 }
 
-.logo img {
-    height: 60px;
-    width: auto;
-    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
-    transition: transform 0.3s ease;
+.site-title h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    letter-spacing: 1px;
 }
 
-.logo img:hover {
-    transform: scale(1.05);
+.site-title h1 span {
+    display: block;
 }
 
-.logo-text {
-    font-size: 1.5rem;
-    font-weight: bold;
+.site-title h1 span.my {
+    font-size: 1.8rem;
+}
+
+.site-title h1 span.en {
+    font-size: 2.2rem;
+}
+
+.logo, .logo img, .logo-text {
+    display: none;
 }
 
 .nav-menu ul {
