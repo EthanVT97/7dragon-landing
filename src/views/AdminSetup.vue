@@ -1,4 +1,4 @@
-&lt;template>
+<template>
   <div class="admin-setup">
     <h1>Admin Setup</h1>
     <div class="setup-card">
