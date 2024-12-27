@@ -95,23 +95,30 @@ const router = createRouter({
 // Navigation Guards
 router.beforeEach((to, from, next) => {
   const store = useStore()
+  const isAuthenticated = store.getters.isAuthenticated
+  const user = store.getters.currentUser
   
   // Check if route requires authentication
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (!store.getters.isAuthenticated) {
+    if (!isAuthenticated) {
       // Redirect to login page if not authenticated
       next({
         path: '/login',
         query: { redirect: to.fullPath }
       })
-    } else if (to.matched.some(record => record.meta.adminOnly) && !store.getters.isAdmin) {
+    } else if (to.matched.some(record => record.meta.adminOnly) && (!user || user.role !== 'admin')) {
       // Redirect to home if not admin
       next({ path: '/' })
     } else {
       next()
     }
   } else {
-    next()
+    // If trying to access login page while already authenticated
+    if (isAuthenticated && to.path === '/login') {
+      next({ path: '/admin/dashboard' })
+    } else {
+      next()
+    }
   }
 })
 

@@ -50,19 +50,39 @@ export default {
 
     const handleLogin = async () => {
       try {
-        await store.dispatch('auth/login', {
+        const { error: loginError } = await store.dispatch('login', {
           email: email.value,
           password: password.value
         })
-        router.push('/admin/dashboard')
+        
+        if (loginError) {
+          error.value = loginError.message || 'Invalid email or password'
+          return
+        }
+
+        // Get the redirect path from the route query
+        const redirectPath = router.currentRoute.value.query.redirect || '/admin/dashboard'
+        router.push(redirectPath)
       } catch (err) {
-        error.value = 'Invalid email or password'
+        error.value = 'An error occurred during login'
+        console.error('Login error:', err)
       }
     }
 
-    const forgotPassword = () => {
-      // Implement password reset functionality
-      console.log('Password reset requested')
+    const forgotPassword = async () => {
+      if (!email.value) {
+        error.value = 'Please enter your email first'
+        return
+      }
+      
+      try {
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.value)
+        if (resetError) throw resetError
+        error.value = 'Password reset instructions sent to your email'
+      } catch (err) {
+        error.value = 'Failed to send reset instructions'
+        console.error('Reset password error:', err)
+      }
     }
 
     return {

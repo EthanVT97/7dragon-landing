@@ -159,16 +159,31 @@ export default createStore({
     
     async login({ commit }, { email, password }) {
       try {
-        const { data: { user }, error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password
         })
         
         if (error) throw error
-        
-        commit('SET_USER', user)
-        return { user }
+
+        // Get user role from profiles table
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .single()
+
+        if (profileError) throw profileError
+
+        // Set user with role information
+        commit('SET_USER', {
+          ...data.user,
+          role: profile.role
+        })
+
+        return { user: data.user }
       } catch (error) {
+        console.error('Login error:', error)
         return { error }
       }
     },
