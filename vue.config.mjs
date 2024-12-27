@@ -1,7 +1,11 @@
 import { defineConfig } from '@vue/cli-service'
 import CompressionPlugin from 'compression-webpack-plugin'
 import TerserPlugin from 'terser-webpack-plugin'
-import path from 'path'
+import { fileURLToPath } from 'url'
+import { dirname } from 'path'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 export default defineConfig({
   publicPath: '/',
@@ -114,7 +118,7 @@ export default defineConfig({
       },
       extensions: ['.mjs', '.js', '.jsx', '.vue', '.json'],
       alias: {
-        '@': path.resolve(__dirname, 'src')
+        '@': fileURLToPath(new URL('./src', import.meta.url))
       }
     },
     performance: {

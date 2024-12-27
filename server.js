@@ -1,13 +1,13 @@
 import express from 'express';
-import path from 'path';
 import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import compression from 'compression';
 import cors from 'cors';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
+import { existsSync } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -71,10 +71,10 @@ app.get('/health', (req, res) => {
 });
 
 // Check if dist directory exists
-const distPath = path.join(__dirname, 'dist');
+const distPath = join(__dirname, 'dist');
 console.log(`Checking dist directory: ${distPath}`);
 try {
-  if (!require('fs').existsSync(distPath)) {
+  if (!existsSync(distPath)) {
     console.error('Error: dist directory does not exist');
     process.exit(1);
   }
@@ -97,7 +97,7 @@ app.use(express.static(distPath, {
 
 // Handle SPA routing
 app.get('*', (req, res) => {
-  res.sendFile(path.join(distPath, 'index.html'), err => {
+  res.sendFile(join(distPath, 'index.html'), err => {
     if (err) {
       console.error('Error sending index.html:', err);
       res.status(500).send('Error loading application');
