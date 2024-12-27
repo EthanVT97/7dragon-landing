@@ -42,6 +42,121 @@ export default createStore({
     }
   },
   actions: {
+    async createAdminUser({ commit }, { username, password, email, role = 'admin' }) {
+      try {
+        // First, create the auth user
+        const { data: { user }, error: authError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              username,
+              role
+            }
+          }
+        })
+
+        if (authError) throw authError
+
+        // Then, insert the admin details into our custom table
+        const { error: profileError } = await supabase
+          .from('admin_users')
+          .insert([
+            {
+              user_id: user.id,
+              username,
+              email,
+              role,
+              created_at: new Date().toISOString()
+            }
+          ])
+
+        if (profileError) throw profileError
+
+        return { user }
+      } catch (error) {
+        console.error('Error creating admin user:', error)
+        return { error }
+      }
+    },
+
+    async getAdminUsers({ commit }) {
+      try {
+        const { data, error } = await supabase
+          .from('admin_users')
+          .select('*')
+          .order('created_at', { ascending: false })
+
+        if (error) throw error
+
+        return { data }
+      } catch (error) {
+        console.error('Error fetching admin users:', error)
+        return { error }
+      }
+    },
+
+    async updateAdminUser({ commit }, { userId, updates }) {
+      try {
+        const { error } = await supabase
+          .from('admin_users')
+          .update(updates)
+          .eq('user_id', userId)
+
+        if (error) throw error
+
+        return { success: true }
+      } catch (error) {
+        console.error('Error updating admin user:', error)
+        return { error }
+      }
+    },
+
+    async deleteAdminUser({ commit }, userId) {
+      try {
+        // Delete from admin_users table
+        const { error: profileError } = await supabase
+          .from('admin_users')
+          .delete()
+          .eq('user_id', userId)
+
+        if (profileError) throw profileError
+
+        // Optionally delete the auth user as well
+        const { error: authError } = await supabase.auth.admin.deleteUser(userId)
+
+        if (authError) throw authError
+
+        return { success: true }
+      } catch (error) {
+        console.error('Error deleting admin user:', error)
+        return { error }
+      }
+    },
+
+    async testConnection({ commit }) {
+      try {
+        const { data, error } = await supabase
+          .from('messages')
+          .select('count')
+          .limit(1)
+        
+        if (error) {
+          console.error('Supabase connection error:', error.message)
+          commit('SET_CONNECTION_STATUS', false)
+          return { error }
+        }
+        
+        console.log('Supabase connection successful')
+        commit('SET_CONNECTION_STATUS', true)
+        return { success: true }
+      } catch (error) {
+        console.error('Supabase connection error:', error)
+        commit('SET_CONNECTION_STATUS', false)
+        return { error }
+      }
+    },
+    
     async login({ commit }, { email, password }) {
       try {
         const { data: { user }, error } = await supabase.auth.signInWithPassword({

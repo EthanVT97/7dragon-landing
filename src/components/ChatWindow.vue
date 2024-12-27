@@ -6,6 +6,7 @@
         <h3>18K Chat</h3>
       </div>
       <div class="chat-status" :class="{ 'connected': isConnected }">
+        <i class="fas" :class="isConnected ? 'fa-check-circle' : 'fa-exclamation-circle'"></i>
         {{ isConnected ? $t('chat.connected') : $t('chat.connecting') }}
       </div>
     </div>

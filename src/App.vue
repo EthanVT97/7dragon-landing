@@ -51,19 +51,26 @@ export default {
     }
   },
   computed: {
-    ...mapState(['isDarkMode', 'currentLanguage']),
+    ...mapState(['isDarkMode', 'currentLanguage', 'isConnected']),
     isAdminRoute() {
       return this.$route.path.startsWith('/admin')
     }
   },
   methods: {
-    ...mapActions(['setLanguage']),
+    ...mapActions(['setLanguage', 'testConnection']),
     toggleChat() {
       this.isChatOpen = !this.isChatOpen
     },
     changeLanguage(lang) {
       this.setLanguage(lang)
       this.$i18n.locale = lang
+    }
+  },
+  async created() {
+    // Test Supabase connection when app starts
+    const { error } = await this.testConnection()
+    if (error) {
+      console.error('Failed to connect to Supabase:', error)
     }
   }
 }

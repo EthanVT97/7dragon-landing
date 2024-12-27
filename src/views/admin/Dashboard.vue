@@ -1,6 +1,24 @@
 <template>
   <div class="dashboard">
     <h1>Admin Dashboard</h1>
+    <nav class="admin-nav">
+      <router-link to="/admin/content" class="nav-item">
+        <i class="fas fa-edit"></i>
+        Content Management
+      </router-link>
+      <router-link to="/admin/chatbot" class="nav-item">
+        <i class="fas fa-robot"></i>
+        Chatbot Settings
+      </router-link>
+      <router-link to="/admin/analytics" class="nav-item">
+        <i class="fas fa-chart-bar"></i>
+        Analytics
+      </router-link>
+      <router-link to="/admin/users" class="nav-item">
+        <i class="fas fa-users-cog"></i>
+        Admin Users
+      </router-link>
+    </nav>
     <div class="stats-grid">
       <div class="stat-card">
         <h3>Total Chats</h3>
@@ -72,6 +90,26 @@ export default {
 
   h1 {
     margin-bottom: $spacing-xl;
+  }
+}
+
+.admin-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: $spacing-lg;
+
+  .nav-item {
+    margin-right: $spacing-md;
+    text-decoration: none;
+    color: $text-color;
+
+    &:hover {
+      color: $accent;
+    }
+
+    i {
+      margin-right: $spacing-xs;
+    }
   }
 }
 

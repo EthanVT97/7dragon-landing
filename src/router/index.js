@@ -10,6 +10,8 @@ import AdminDashboard from '@/views/admin/Dashboard.vue'
 import AdminContent from '@/views/admin/Content.vue'
 import AdminChatbot from '@/views/admin/Chatbot.vue'
 import AdminAnalytics from '@/views/admin/Analytics.vue'
+import AdminUsers from '@/views/admin/Users.vue'
+import AdminSetup from '@/views/AdminSetup.vue'
 import NotFound from '@/views/NotFound.vue'
 
 const routes = [
@@ -37,7 +39,7 @@ const routes = [
     path: '/admin',
     name: 'Admin',
     component: AdminDashboard,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, adminOnly: true },
     children: [
       {
         path: 'content',
@@ -53,8 +55,18 @@ const routes = [
         path: 'analytics',
         name: 'AdminAnalytics',
         component: AdminAnalytics
+      },
+      {
+        path: 'users',
+        name: 'AdminUsers',
+        component: AdminUsers
       }
     ]
+  },
+  {
+    path: '/admin-setup',
+    name: 'AdminSetup',
+    component: AdminSetup
   },
   {
     path: '/:pathMatch(.*)*',
