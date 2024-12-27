@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 10000;
 
 // Enable request logging
 app.use((req, res, next) => {
@@ -71,7 +71,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 10000;
 
 // Trust proxy - required when behind a reverse proxy (Heroku, Render, etc)
 app.set('trust proxy', 1);
