@@ -45,7 +45,7 @@ module.exports = defineConfig({
       }
     })
 
-    // Add compression
+    // Add compression in production
     if (process.env.NODE_ENV === 'production') {
       config.plugin('compression').use(CompressionPlugin, [{
         filename: '[path][base].gz',
@@ -115,11 +115,7 @@ module.exports = defineConfig({
     optimization: {
       moduleIds: 'deterministic',
       runtimeChunk: 'single',
-      minimize: true,
-      minimizer: [
-        `...`,
-        new (require('css-minimizer-webpack-plugin'))(),
-      ]
+      minimize: true
     }
   }
 })

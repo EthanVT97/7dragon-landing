@@ -2,14 +2,13 @@
   "name": "18k-chat",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "serve": "vue-cli-service serve",
     "dev": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "postinstall": "npm run build",
-    "init-admin": "node scripts/initAdmin.js"
+    "init-admin": "node scripts/initAdmin.cjs"
   },
   "dependencies": {
     "@vue/cli-service": "~5.0.8",
