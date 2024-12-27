@@ -15,7 +15,7 @@ async function createInitialAdmin() {
     console.log('Starting admin user creation process...')
 
     // First check if we can connect to Supabase
-    const { data: healthCheck, error: healthError } = await supabase
+    const { error: healthError } = await supabase
       .from('admin_users')
       .select('count')
       .limit(1)
@@ -46,7 +46,7 @@ async function createInitialAdmin() {
     console.log('No existing admin found, proceeding with creation')
 
     // Check if the auth user exists first
-    const { data: { users }, error: authCheckError } = await supabase.auth.admin.listUsers()
+    const { data: { users } } = await supabase.auth.admin.listUsers()
     const existingAuthUser = users?.find(u => u.email === 'admin@18kchat.com')
 
     if (existingAuthUser) {
