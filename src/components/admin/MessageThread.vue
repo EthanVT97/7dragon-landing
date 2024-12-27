@@ -145,9 +145,9 @@ export default {
     }
   },
 
-  emits: ['close'],
+  emits: ['close', 'update:message'],
 
-  setup(props) {
+  setup(props, { emit }) {
     const replyText = ref('')
     const replies = ref([])
     const showEmojiPicker = ref(false)
@@ -194,7 +194,7 @@ export default {
       if (!replyText.value.trim()) return
 
       try {
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('message_replies')
           .insert({
             message_id: props.message.id,
@@ -228,11 +228,14 @@ export default {
         if (targetId) {
           await fetchReplies()
         } else {
-          // Refresh message reactions
-          props.message.reactions = [
-            ...(props.message.reactions || []),
-            { emoji, user_id: supabase.auth.user().id }
-          ]
+          // Refresh message reactions by emitting update
+          emit('update:message', {
+            ...props.message,
+            reactions: [
+              ...(props.message.reactions || []),
+              { emoji, user_id: supabase.auth.user().id }
+            ]
+          })
         }
       } catch (error) {
         console.error('Error adding reaction:', error)
@@ -255,10 +258,13 @@ export default {
         if (targetId) {
           await fetchReplies()
         } else {
-          // Remove reaction locally
-          props.message.reactions = props.message.reactions.filter(
-            r => !(r.emoji === emoji && r.user_id === supabase.auth.user().id)
-          )
+          // Remove reaction locally by emitting update
+          emit('update:message', {
+            ...props.message,
+            reactions: props.message.reactions.filter(
+              r => !(r.emoji === emoji && r.user_id === supabase.auth.user().id)
+            )
+          })
         }
       } catch (error) {
         console.error('Error removing reaction:', error)

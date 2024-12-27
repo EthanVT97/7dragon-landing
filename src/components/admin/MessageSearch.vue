@@ -88,7 +88,7 @@
 </template>
 
 <script>
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { supabase } from '@/supabase'
 import { format } from 'date-fns'
 import debounce from 'lodash/debounce'

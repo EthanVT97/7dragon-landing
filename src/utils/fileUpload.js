@@ -13,7 +13,7 @@ export async function uploadChatImage(imageFile, sessionId, userId) {
     const fileName = `${Date.now()}-${imageFile.name}`
     const filePath = `${userId}/${fileName}`
     
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('chat-images')
       .upload(filePath, imageFile, {
         cacheControl: '3600',
@@ -80,7 +80,7 @@ export async function uploadChatFile(file, sessionId, userId) {
     const fileName = `${Date.now()}-${file.name}`
     const filePath = `${userId}/${fileName}`
     
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('chat-files')
       .upload(filePath, file, {
         cacheControl: '3600',
@@ -171,7 +171,7 @@ export async function deleteChatMessage(messageId, userId) {
     }
 
     // Delete the message
-    const { data, error: deleteError } = await supabase
+    const { error: deleteError } = await supabase
       .from('chat_messages')
       .delete()
       .eq('id', messageId)

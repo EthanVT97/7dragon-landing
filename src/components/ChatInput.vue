@@ -117,7 +117,7 @@ export default {
       try {
         if (selectedFile.value) {
           // Upload image
-          const { data, error: uploadError } = await uploadChatImage(
+          const { error: uploadError } = await uploadChatImage(
             selectedFile.value,
             props.sessionId,
             store.state.user.id

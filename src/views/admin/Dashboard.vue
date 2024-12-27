@@ -159,7 +159,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { supabase } from '@/supabase'
 import { Line as LineChart, Doughnut as DoughnutChart } from 'vue-chartjs'
 import { format, formatDistanceToNow } from 'date-fns'
