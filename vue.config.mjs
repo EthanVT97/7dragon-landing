@@ -1,7 +1,7 @@
-const { defineConfig } = require('@vue/cli-service')
-const CompressionPlugin = require('compression-webpack-plugin')
+import { defineConfig } from '@vue/cli-service'
+import CompressionPlugin from 'compression-webpack-plugin'
 
-module.exports = defineConfig({
+export default defineConfig({
   css: {
     loaderOptions: {
       scss: {
