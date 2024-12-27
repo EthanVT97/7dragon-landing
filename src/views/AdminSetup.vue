@@ -11,6 +11,7 @@
         <button @click="runSetup" :disabled="isLoading" class="setup-button">
           {{ isLoading ? 'Creating Admin...' : 'Create Admin User' }}
         </button>
+        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
       </div>
       <div v-else>
         <div class="success-message">
@@ -34,20 +35,26 @@ export default {
   setup() {
     const isLoading = ref(false)
     const setupComplete = ref(false)
+    const errorMessage = ref('')
 
     const runSetup = async () => {
       isLoading.value = true
+      errorMessage.value = ''
+      
       try {
         const { error } = await createInitialAdmin()
         if (error) {
           console.error('Setup failed:', error)
-          alert('Failed to create admin user. Check console for details.')
+          errorMessage.value = error.message || 'Failed to create admin user'
+          if (error.details) {
+            console.error('Error details:', error.details)
+          }
         } else {
           setupComplete.value = true
         }
       } catch (error) {
         console.error('Unexpected error:', error)
-        alert('An unexpected error occurred. Check console for details.')
+        errorMessage.value = 'An unexpected error occurred'
       } finally {
         isLoading.value = false
       }
@@ -56,6 +63,7 @@ export default {
     return {
       isLoading,
       setupComplete,
+      errorMessage,
       runSetup
     }
   }
@@ -148,5 +156,10 @@ export default {
     background: rgba(82, 215, 183, 0.2);
     transform: translateY(-2px);
   }
+}
+
+.error-message {
+  color: var(--color-error);
+  margin-top: 1rem;
 }
 </style>
