@@ -1,4 +1,6 @@
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
 .DS_Store
 node_modules
 /dist
@@ -21,8 +23,12 @@ pnpm-debug.log*
 *.sln
 *.sw?
 =======
+>>>>>>> 98c95114a949d873ae957bb4ed25891dc258c24b
 node_modules/
 .env
 .DS_Store
 *.log
+<<<<<<< HEAD
+=======
 >>>>>>> origin/main
+>>>>>>> 98c95114a949d873ae957bb4ed25891dc258c24b

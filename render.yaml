@@ -1,40 +1,16 @@
 services:
   - type: web
+<<<<<<< HEAD
     name: 7dragon-chat-master
+=======
+    name: 7dragon-landing
+>>>>>>> df80ad137dd19cd76afacca288d07998a0a24e54
     env: node
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    buildCommand: npm install
+    startCommand: node server.js
     envVars:
-      - key: NODE_ENV
-        value: production
-      - key: VUE_APP_SUPABASE_URL
-        value: https://xnujjoarvinvztccwrye.supabase.co
-      - key: VUE_APP_SUPABASE_KEY
-        sync: false
-      - key: SUPABASE_SERVICE_ROLE_KEY
-        sync: false
       - key: NODE_VERSION
         value: 18.0.0
-      - key: PORT
-        value: 10000
-    healthCheckPath: /health
+      - key: NODE_ENV
+        value: production
     autoDeploy: true
-    buildFilter:
-      paths:
-        - src/**
-        - public/**
-        - package.json
-        - package-lock.json
-    headers:
-      - path: /*
-        name: X-Frame-Options
-        value: DENY
-      - path: /*
-        name: X-Content-Type-Options
-        value: nosniff
-      - path: /*
-        name: Referrer-Policy
-        value: strict-origin-when-cross-origin
-      - path: /*
-        name: Content-Security-Policy
-        value: "default-src 'self' https://xnujjoarvinvztccwrye.supabase.co wss://xnujjoarvinvztccwrye.supabase.co https://www.m9asia.com; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;"
