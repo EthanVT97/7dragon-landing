@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18K Chat - Connect Across Languages</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="stars"></div>
+    <nav>
+        <div class="logo">
+            <img src="18kchatlogo.jpg" alt="18K Chat Logo">
+        </div>
+        <div class="nav-links">
+            <a href="#home" class="active">Home</a>
+            <a href="#chat">Chat</a>
+            <a href="#admin">Admin</a>
+        </div>
+        <div class="language-selector">
+            <button onclick="changeLanguage('en')" class="lang-btn">English</button>
+            <button onclick="changeLanguage('my')" class="lang-btn">မြန်မာ</button>
+            <button onclick="changeLanguage('th')" class="lang-btn">ไทย</button>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Home Section -->
+        <section id="home" class="section">
+            <div class="hero">
+                <h1 class="glow">
+                    <span class="en">Welcome to 18K Chat</span>
+                    <span class="my">18K Chat မှ ကြိုဆိုပါတယ်</span>
+                    <span class="th">ยินดีต้อนรับสู่ 18K Chat</span>
+                </h1>
+                <p class="subtitle">
+                    <span class="en">Connect with people across Myanmar, Thailand, and the world</span>
+                    <span class="my">မြန်မာ၊ ထိုင်းနှင့် ကမ္ဘာတစ်ဝှမ်းမှ လူများနှင့် ချိတ်ဆက်ပါ</span>
+                    <span class="th">เชื่อมต่อกับผู้คนทั่วพม่า ไทย และทั่วโลก</span>
+                </p>
+                <div class="cta-buttons">
+                    <button class="download-btn" onclick="startChat()">
+                        <span class="en">Start Chat</span>
+                        <span class="my">စကားပြောရန်</span>
+                        <span class="th">เริ่มแชท</span>
+                    </button>
+                    <button class="learn-more-btn">
+                        <span class="en">Learn More</span>
+                        <span class="my">ပိုမိုလေ့လာရန်</span>
+                        <span class="th">เรียนรู้เพิ่มเติม</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chat Section -->
+        <section id="chat" class="section">
+            <div class="chat-container">
+                <div class="chat-sidebar">
+                    <div class="user-profile">
+                        <img src="https://via.placeholder.com/50" alt="User Profile" id="userProfileImg">
+                        <div class="user-info">
+                            <h3 id="userName">Guest User</h3>
+                            <p id="userStatus">Online</p>
+                        </div>
+                    </div>
+                    <div class="search-box">
+                        <input type="text" placeholder="Search messages..." id="messageSearch">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="chat-modes">
+                        <button class="mode-btn active" data-mode="bot">
+                            <i class="fas fa-robot"></i>
+                            <span>ChatBot</span>
+                        </button>
+                        <button class="mode-btn" data-mode="support">
+                            <i class="fas fa-headset"></i>
+                            <span>Support</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="chat-main">
+                    <div class="chat-header">
+                        <div class="chat-user-info">
+                            <i class="fas fa-robot" id="chatMode"></i>
+                            <h3 id="chatTitle">ChatBot Assistant</h3>
+                        </div>
+                        <div class="chat-actions">
+                            <button id="clearChat" title="Clear Chat">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button id="toggleTheme" title="Toggle Theme">
+                                <i class="fas fa-moon"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Messages will be dynamically added here -->
+                    </div>
+                    <div class="chat-input">
+                        <button class="emoji-btn">
+                            <i class="fas fa-smile"></i>
+                        </button>
+                        <input type="text" id="messageInput" placeholder="Type a message...">
+                        <button class="attach-btn">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        <button class="send-btn" id="sendMessage">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Panel Section -->
+        <section id="admin" class="section">
+            <div class="admin-container">
+                <div class="admin-sidebar">
+                    <div class="admin-menu">
+                        <div class="menu-item active" data-panel="dashboard">
+                            <i class="fas fa-dashboard"></i>
+                            <span>Dashboard</span>
+                        </div>
+                        <div class="menu-item" data-panel="chatbot">
+                            <i class="fas fa-robot"></i>
+                            <span>ChatBot Config</span>
+                        </div>
+                        <div class="menu-item" data-panel="users">
+                            <i class="fas fa-users"></i>
+                            <span>Users</span>
+                        </div>
+                        <div class="menu-item" data-panel="analytics">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Analytics</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="admin-main">
+                    <!-- Dashboard Panel -->
+                    <div class="admin-panel active" id="dashboardPanel">
+                        <div class="admin-header">
+                            <h2>Dashboard</h2>
+                            <div class="date-range">
+                                <input type="date" id="startDate">
+                                <input type="date" id="endDate">
+                            </div>
+                        </div>
+                        <div class="admin-stats">
+                            <div class="stat-card">
+                                <i class="fas fa-users"></i>
+                                <div class="stat-info">
+                                    <h3>Total Users</h3>
+                                    <p id="totalUsers">Loading...</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <i class="fas fa-message"></i>
+                                <div class="stat-info">
+                                    <h3>Messages Today</h3>
+                                    <p id="todayMessages">Loading...</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <i class="fas fa-robot"></i>
+                                <div class="stat-info">
+                                    <h3>Bot Responses</h3>
+                                    <p id="botResponses">Loading...</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="admin-chart">
+                            <canvas id="userActivityChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- ChatBot Config Panel -->
+                    <div class="admin-panel" id="chatbotPanel">
+                        <div class="admin-header">
+                            <h2>ChatBot Configuration</h2>
+                            <button id="addConfig" class="btn-primary">
+                                <i class="fas fa-plus"></i> Add New Response
+                            </button>
+                        </div>
+                        <div class="config-list" id="chatbotConfigList">
+                            <!-- ChatBot configurations will be listed here -->
+                        </div>
+                    </div>
+
+                    <!-- Users Panel -->
+                    <div class="admin-panel" id="usersPanel">
+                        <div class="admin-header">
+                            <h2>User Management</h2>
+                            <div class="admin-search">
+                                <input type="text" placeholder="Search users...">
+                                <i class="fas fa-search"></i>
+                            </div>
+                        </div>
+                        <div class="users-list" id="usersList">
+                            <!-- Users will be listed here -->
+                        </div>
+                    </div>
+
+                    <!-- Analytics Panel -->
+                    <div class="admin-panel" id="analyticsPanel">
+                        <div class="admin-header">
+                            <h2>Analytics</h2>
+                            <div class="analytics-filters">
+                                <select id="analyticsMetric">
+                                    <option value="messages">Messages</option>
+                                    <option value="users">Users</option>
+                                    <option value="responses">Bot Responses</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="analytics-charts">
+                            <canvas id="analyticsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for ChatBot Config -->
+    <div class="modal" id="configModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add/Edit ChatBot Response</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="keywordInput">Keyword Trigger</label>
+                    <input type="text" id="keywordInput" placeholder="Enter keyword...">
+                </div>
+                <div class="form-group">
+                    <label for="responseInput">Bot Response</label>
+                    <textarea id="responseInput" placeholder="Enter bot response..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelConfig">Cancel</button>
+                <button class="btn-primary" id="saveConfig">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="config.js"></script>
+    <script type="module" src="supabase.js"></script>
+    <script type="module" src="chat.js"></script>
+    <script type="module" src="admin.js"></script>
+    <script type="module" src="script.js"></script>
+</body>
+</html>
