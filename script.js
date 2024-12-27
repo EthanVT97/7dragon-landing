@@ -112,6 +112,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Mobile Menu Toggle
+    const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+    const navMenu = document.querySelector('.nav-menu');
+
+    mobileMenuToggle.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+        mobileMenuToggle.querySelector('i').classList.toggle('fa-bars');
+        mobileMenuToggle.querySelector('i').classList.toggle('fa-times');
+    });
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!navMenu.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+            navMenu.classList.remove('active');
+            mobileMenuToggle.querySelector('i').classList.add('fa-bars');
+            mobileMenuToggle.querySelector('i').classList.remove('fa-times');
+        }
+    });
+
     // Chat functionality
     let isChatOpen = false;
 
@@ -153,13 +172,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (error) throw error;
 
-            // Simulate bot response
+            // Process bot response
+            const botResponse = await processBotResponse(message);
+            
+            // Add bot response
             setTimeout(() => {
-                const lang = document.documentElement.lang;
-                const response = lang === 'my'
-                    ? 'သင့်မက်ဆေ့ခ်ျအတွက် ကျေးဇူးတင်ပါသည်။ ကျွန်ုပ်တို့၏ အဖွဲ့မှ မကြာမီ ပြန်လည်တုံ့ပြန်ပါမည်။'
-                    : 'Thank you for your message. Our team will respond shortly.';
-                addMessage('bot', response);
+                addMessage('bot', botResponse);
             }, 1000);
 
         } catch (error) {
@@ -192,4 +210,14 @@ document.addEventListener('DOMContentLoaded', () => {
         chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     };
+
+    // Subscribe to real-time updates
+    const messageSubscription = supabase
+        .channel('public:messages')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+            if (payload.new.type === 'bot') {
+                addMessage('bot', payload.new.content);
+            }
+        })
+        .subscribe();
 });

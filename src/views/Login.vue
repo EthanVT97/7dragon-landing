@@ -98,7 +98,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+// Import SASS modules first
 @use "sass:color";
+
+// Then import variables
+@import "@/assets/styles/_variables";
 
 .login {
   min-height: 100vh;

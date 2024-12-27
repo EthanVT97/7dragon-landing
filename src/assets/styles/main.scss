@@ -1,11 +1,23 @@
 @use "sass:color";
-@use "@/assets/styles/_variables" as *;
+@use "sass:math";
+
+@import "./_variables";
+
+// Global styles
+:root {
+  --primary: #{$primary};
+  --secondary: #{$secondary};
+  --accent: #{$accent};
+  --background: #{$background};
+  --text: #{$text};
+  --highlight: #{$highlight};
+  --error: #{$error};
+}
 
 // Base styles
 html, body {
   margin: 0;
   padding: 0;
-  font-size: $font-size-base;
   font-family: $font-family-base;
   background-color: $background;
   color: $text;
@@ -23,7 +35,7 @@ a {
   transition: color 0.2s ease;
 
   &:hover {
-    color: color.adjust($accent, $lightness: -10%);
+    color: darken($accent, 10%);
   }
 }
 
@@ -43,7 +55,7 @@ a {
     color: white;
 
     &:hover {
-      background-color: color.adjust($primary, $lightness: -10%);
+      background-color: darken($primary, 10%);
     }
   }
 
@@ -52,65 +64,86 @@ a {
     color: white;
 
     &:hover {
-      background-color: color.adjust($secondary, $lightness: -10%);
+      background-color: darken($secondary, 10%);
     }
+  }
+
+  &-accent {
+    background-color: $accent;
+    color: $background;
+
+    &:hover {
+      background-color: darken($accent, 10%);
+    }
+  }
+
+  &-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }
 
 // Form elements
-.form-control {
-  display: block;
-  width: 100%;
+input, textarea {
   padding: $spacing-sm;
-  font-size: $font-size-base;
-  line-height: 1.5;
-  color: $text;
-  background-color: color.adjust($background, $lightness: 10%);
-  border: 1px solid color.adjust($text, $alpha: -0.8);
+  border: 1px solid darken($text, 50%);
   border-radius: $border-radius-sm;
+  background-color: lighten($background, 10%);
+  color: $text;
+  font-size: $font-size-base;
   transition: border-color 0.2s ease;
 
   &:focus {
     outline: none;
     border-color: $accent;
   }
-}
 
-// Responsive utilities
-@mixin mobile {
-  @media (max-width: $mobile) {
-    @content;
+  &::placeholder {
+    color: darken($text, 40%);
   }
 }
 
-// Container
+// Layout
 .container {
-  width: 100%;
-  max-width: 1200px;
+  max-width: $desktop;
   margin: 0 auto;
   padding: 0 $spacing-md;
-  box-sizing: border-box;
 }
 
-// Grid system
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0 -#{$spacing-sm};
+// Card
+.card {
+  background-color: lighten($background, 5%);
+  border-radius: $border-radius-md;
+  padding: $spacing-lg;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.col {
-  flex: 1;
-  padding: 0 $spacing-sm;
-  box-sizing: border-box;
+// Responsive
+@media screen and (max-width: $mobile) {
+  html, body {
+    font-size: $font-size-sm;
+  }
 
-  @include mobile {
-    flex: 0 0 100%;
-    max-width: 100%;
+  .container {
+    padding: 0 $spacing-sm;
   }
 }
 
-// Utility classes
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+// Utilities
 .text-center { text-align: center; }
 .text-right { text-align: right; }
 .text-left { text-align: left; }
@@ -118,11 +151,19 @@ a {
 .mt-1 { margin-top: $spacing-sm; }
 .mt-2 { margin-top: $spacing-md; }
 .mt-3 { margin-top: $spacing-lg; }
+.mt-4 { margin-top: $spacing-xl; }
 
 .mb-1 { margin-bottom: $spacing-sm; }
 .mb-2 { margin-bottom: $spacing-md; }
 .mb-3 { margin-bottom: $spacing-lg; }
+.mb-4 { margin-bottom: $spacing-xl; }
 
-.p-1 { padding: $spacing-sm; }
-.p-2 { padding: $spacing-md; }
-.p-3 { padding: $spacing-lg; }
+.mx-1 { margin-left: $spacing-sm; margin-right: $spacing-sm; }
+.mx-2 { margin-left: $spacing-md; margin-right: $spacing-md; }
+.mx-3 { margin-left: $spacing-lg; margin-right: $spacing-lg; }
+.mx-4 { margin-left: $spacing-xl; margin-right: $spacing-xl; }
+
+.my-1 { margin-top: $spacing-sm; margin-bottom: $spacing-sm; }
+.my-2 { margin-top: $spacing-md; margin-bottom: $spacing-md; }
+.my-3 { margin-top: $spacing-lg; margin-bottom: $spacing-lg; }
+.my-4 { margin-top: $spacing-xl; margin-bottom: $spacing-xl; }
