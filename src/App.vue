@@ -28,17 +28,20 @@
       </button>
       <chat-window v-if="isChatOpen" />
     </div>
+    <LiveChat v-if="isAuthenticated && !isAdmin" />
   </div>
 </template>
 
 <script>
 import ChatWindow from '@/components/ChatWindow.vue'
-import { mapState, mapActions } from 'vuex'
+import LiveChat from '@/components/LiveChat.vue'
+import { mapState, mapActions, mapGetters } from 'vuex'
 
 export default {
   name: 'App',
   components: {
-    ChatWindow
+    ChatWindow,
+    LiveChat
   },
   data() {
     return {
@@ -52,6 +55,10 @@ export default {
   },
   computed: {
     ...mapState(['isDarkMode', 'currentLanguage', 'isConnected']),
+    ...mapGetters(['isAuthenticated', 'currentUser']),
+    isAdmin() {
+      return this.currentUser && this.currentUser.role === 'admin'
+    },
     isAdminRoute() {
       return this.$route.path.startsWith('/admin')
     }

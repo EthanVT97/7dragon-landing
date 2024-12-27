@@ -39,6 +39,18 @@ export default createStore({
     },
     RESET_UNREAD(state) {
       state.unreadMessages = 0
+    },
+    INCREMENT_UNREAD(state) {
+      state.unreadMessages++
+    },
+    UPDATE_MESSAGE_STATUS(state, { timestamp, status, id }) {
+      const messageIndex = state.messages.findIndex(message => message.timestamp.getTime() === timestamp.getTime())
+      if (messageIndex !== -1) {
+        state.messages[messageIndex].status = status
+        if (id) {
+          state.messages[messageIndex].id = id
+        }
+      }
     }
   },
   actions: {
@@ -216,29 +228,46 @@ export default createStore({
         if (!state.isConnected) {
           throw new Error('Not connected to chat service')
         }
-        
+
+        // Create message object
         const message = {
           content,
           timestamp: new Date(),
           isFromUser: true,
-          status: 'sent'
+          status: 'sending'
         }
-        
+
+        // Add to local state
         commit('ADD_MESSAGE', message)
-        
+
         // Send to Supabase
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('messages')
           .insert([{
             content: content,
-            user_id: state.user?.id,
-            is_from_user: true
+            user_id: state.user.id,
+            is_from_user: true,
+            session_id: state.user.session_id || null
           }])
-        
+          .select()
+          .single()
+
         if (error) throw error
-        
+
+        // Update message status
+        commit('UPDATE_MESSAGE_STATUS', {
+          timestamp: message.timestamp,
+          status: 'sent',
+          id: data.id
+        })
+
         return { success: true }
       } catch (error) {
+        console.error('Failed to send message:', error)
+        commit('UPDATE_MESSAGE_STATUS', {
+          timestamp: message.timestamp,
+          status: 'failed'
+        })
         return { error }
       }
     },
