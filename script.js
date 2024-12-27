@@ -1,5 +1,3 @@
-import { initChat } from './chat.js';
-import { initAdmin } from './admin.js';
 import supabase from './supabase.js';
 
 // Language handling
@@ -14,18 +12,26 @@ const setLanguage = (lang) => {
     });
 };
 
-// Chat Interface Functions
-window.startChat = () => {
-    const chatInterface = document.getElementById('chat-interface');
-    chatInterface.classList.remove('hidden');
+// Navigation handling
+const navigateToSection = (sectionId) => {
+    const navLinks = document.querySelectorAll('.nav-menu a');
+    const sections = document.querySelectorAll('.section');
+    
+    // Remove active class from all links and sections
+    navLinks.forEach(link => link.classList.remove('active'));
+    sections.forEach(section => section.classList.remove('active'));
+    
+    // Add active class to current section and link
+    const targetSection = document.getElementById(sectionId);
+    const targetLink = document.querySelector(`.nav-menu a[href="#${sectionId}"]`);
+    
+    if (targetSection && targetLink) {
+        targetSection.classList.add('active');
+        targetLink.classList.add('active');
+    }
 };
 
-window.closeChat = () => {
-    const chatInterface = document.getElementById('chat-interface');
-    chatInterface.classList.add('hidden');
-};
-
-// Navigation
+// Initialize app
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize language
     const savedLang = localStorage.getItem('preferredLanguage') || 'my';
@@ -39,28 +45,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Navigation handling
-    const navLinks = document.querySelectorAll('.nav-menu a');
-    const sections = document.querySelectorAll('.section');
-
-    navLinks.forEach(link => {
+    // Handle navigation clicks
+    document.querySelectorAll('.nav-menu a').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            
-            // Update active nav link
-            navLinks.forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-            
-            // Show corresponding section
-            const targetId = link.getAttribute('data-section');
-            sections.forEach(section => {
-                section.classList.remove('active');
-                if (section.id === targetId) {
-                    section.classList.add('active');
-                }
-            });
+            const sectionId = link.getAttribute('href').substring(1);
+            navigateToSection(sectionId);
+            history.pushState(null, '', `#${sectionId}`);
         });
     });
+
+    // Handle direct URL access with hash
+    const handleHashChange = () => {
+        const hash = window.location.hash.substring(1) || 'home';
+        navigateToSection(hash);
+    };
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange);
+
+    // Handle initial load
+    handleHashChange();
 
     // Login form handling
     const loginForm = document.getElementById('loginForm');
