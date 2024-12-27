@@ -38,6 +38,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
+import { supabase } from '@/supabase'
 
 export default {
   name: 'Login',
