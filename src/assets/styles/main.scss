@@ -1,11 +1,23 @@
-@import "@/assets/styles/_variables";
-@import "@/assets/styles/support-dashboard";
+@use "sass:color";
+@use "sass:math";
+
+@import "./_variables";
+
+// Global styles
+:root {
+  --primary: #{$primary};
+  --secondary: #{$secondary};
+  --accent: #{$accent};
+  --background: #{$background};
+  --text: #{$text};
+  --highlight: #{$highlight};
+  --error: #{$error};
+}
 
 // Base styles
 html, body {
   margin: 0;
   padding: 0;
-  font-size: $font-size-base;
   font-family: $font-family-base;
   background-color: $background;
   color: $text;

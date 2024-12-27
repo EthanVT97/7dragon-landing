@@ -414,10 +414,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+// Import SASS modules first
 @use "sass:color";
 
+// Then import variables
+@import "@/assets/styles/_variables";
+
 .admin-dashboard {
-  padding: 24px;
+  padding: $spacing-lg;
   
   .dashboard-header {
     margin-bottom: 24px;

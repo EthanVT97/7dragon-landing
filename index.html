@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="18K - Your Premier Online Gaming Destination">
+    <meta name="description" content="7Dragon - Your Premier Online Gaming Destination">
     <title>7Dragon Gaming</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="7Dlogo.jpg">
+    <link rel="icon" type="image/x-icon" href="7DBG.jpg">
     
     <!-- DNS Prefetch -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
@@ -39,9 +39,12 @@
     <!-- Header Navigation -->
     <header class="header">
         <div class="logo">
-            <img src="18kchatlogo.jpg" alt="18K Logo">
-            <span class="logo-text">18K Gaming</span>
+            <img src="7DBG.jpg" alt="7Dragon Logo">
+            <span class="logo-text">7Dragon Gaming</span>
         </div>
+        <button class="mobile-menu-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
         <nav class="nav-menu">
             <ul>
                 <li><a href="#home" class="active" data-section="home">
@@ -76,8 +79,8 @@
             </div>
             <div class="hero">
                 <h1>
-                    <span class="my">18K Gaming မှ ကြိုဆိုပါတယ်</span>
-                    <span class="en">Welcome to 18K Gaming</span>
+                    <span class="my">7Dragon Gaming မှ ကြိုဆိုပါတယ်</span>
+                    <span class="en">Welcome to 7Dragon Gaming</span>
                 </h1>
                 <p>
                     <span class="my">အကောင်းဆုံး အွန်လိုင်းဂိမ်း အတွေ့အကြုံကို ရယူလိုက်ပါ</span>
@@ -205,50 +208,51 @@
     </main>
 
     <!-- Chat Widget -->
-    <div class="gaming-pattern"></div>
-    <header class="header">
-        <div class="logo-container">
-            <img src="7Dlogo.jpg" alt="7Dragon Gaming Logo" class="logo">
-            <h1>7Dragon</h1>
-        </div>
-        <div class="header-buttons">
-            <a href="https://www.m9asia.com/" target="_blank" class="button play-btn">Play Now</a>
-            <button class="button login-btn">Login</button>
-            <button class="button register-btn">Register</button>
-        </div>
-    </header>
-
-    <div class="container">
-        <div class="chat-container">
+    <div class="chat-widget">
+        <button class="chat-button" onclick="toggleChat()">
+            <i class="fas fa-comments"></i>
+            <span class="my">ဆက်သွယ်ရန်</span>
+            <span class="en">Chat with us</span>
+        </button>
+        
+        <div id="chat-interface" class="chat-interface hidden">
             <div class="chat-header">
-                <h2>Live Game Support</h2>
-                <div class="chat-status">
-                    <div class="status-indicator"></div>
-                    <span>Online</span>
+                <div class="chat-title">
+                    <img src="7DBG.jpg" alt="7Dragon Support" class="chat-avatar">
+                    <div class="chat-info">
+                        <h3>
+                            <span class="my">7Dragon ပံ့ပိုးမှု</span>
+                            <span class="en">7Dragon Support</span>
+                        </h3>
+                        <span class="status online">
+                            <span class="my">အွန်လိုင်း</span>
+                            <span class="en">Online</span>
+                        </span>
+                    </div>
                 </div>
+                <button class="close-chat" onclick="toggleChat()">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             
-            <div id="chatMessages">
-                <!-- Messages will be dynamically added here -->
-            </div>
+            <div id="chatMessages" class="chat-messages"></div>
             
-            <form class="chat-input">
-                <input 
-                    type="text" 
+            <div class="chat-input-area">
+                <textarea 
                     id="messageInput" 
                     placeholder="Type your message..." 
-                    autocomplete="off"
-                    maxlength="500"
-                >
-                <button type="submit" class="send-button">
-                    Send Message
+                    onkeypress="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }">
+                </textarea>
+                <button onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
                 </button>
-            </form>
+            </div>
         </div>
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
     <script src="script.js"></script>
-    <script src="chat.js"></script>
 </body>
 </html>

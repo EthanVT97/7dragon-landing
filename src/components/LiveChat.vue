@@ -158,13 +158,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+// Import SASS modules first
 @use "sass:color";
 
+// Then import variables
+@import "@/assets/styles/_variables";
+
 .live-chat {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
+  background: rgba($primary, 0.1);
+  border-radius: $border-radius-lg;
+  padding: $spacing-md;
 }
 
 .chat-toggle {
