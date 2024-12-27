@@ -42,7 +42,7 @@ export default createStore({
     }
   },
   actions: {
-    async createAdminUser({ commit }, { username, password, email, role = 'admin' }) {
+    async createAdminUser({ }, { username, password, email, role = 'admin' }) {
       try {
         // First, create the auth user
         const { data: { user }, error: authError } = await supabase.auth.signUp({
@@ -80,7 +80,7 @@ export default createStore({
       }
     },
 
-    async getAdminUsers({ commit }) {
+    async getAdminUsers() {
       try {
         const { data, error } = await supabase
           .from('admin_users')
@@ -96,7 +96,7 @@ export default createStore({
       }
     },
 
-    async updateAdminUser({ commit }, { userId, updates }) {
+    async updateAdminUser({ }, { userId, updates }) {
       try {
         const { error } = await supabase
           .from('admin_users')
@@ -112,7 +112,7 @@ export default createStore({
       }
     },
 
-    async deleteAdminUser({ commit }, userId) {
+    async deleteAdminUser({ }, userId) {
       try {
         // Delete from admin_users table
         const { error: profileError } = await supabase
@@ -136,7 +136,7 @@ export default createStore({
 
     async testConnection({ commit }) {
       try {
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('messages')
           .select('count')
           .limit(1)
