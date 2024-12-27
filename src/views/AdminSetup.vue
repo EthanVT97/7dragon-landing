@@ -18,8 +18,8 @@
           <h2>Setup Complete!</h2>
           <p>Admin user has been created successfully.</p>
           <p>You can now log in with the credentials above.</p>
+          <router-link to="/login" class="login-link">Go to Login</router-link>
         </div>
-        <router-link to="/login" class="login-link">Go to Login</router-link>
       </div>
     </div>
   </div>

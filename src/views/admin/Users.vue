@@ -1,4 +1,4 @@
-&lt;template>
+<template>
   <div class="admin-users">
     <div class="header">
       <h1>Admin Users Management</h1>
