@@ -262,15 +262,58 @@ body {
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .chat-header {
-    background: var(--dark-gray);
-    color: var(--text-white);
-    padding: 15px;
+    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 15px;
+    background: linear-gradient(to right, var(--dark-gray), var(--primary-black));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.header-text h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.header-text .status-text {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.close-chat {
+    background: transparent;
+    border: none;
+    color: var(--text-white);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0 5px;
+    transition: all 0.3s ease;
+}
+
+.close-chat:hover {
+    transform: scale(1.2);
+    color: var(--vibrant-red);
 }
 
 .chat-messages {
@@ -351,6 +394,52 @@ body {
 .quick-replies button:hover {
     background: var(--vibrant-red);
     transform: translateY(-2px);
+}
+
+.operating-hours {
+    text-align: center;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 10px;
+}
+
+/* Status Indicator */
+.status-indicator {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.8);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #666;
+    animation: statusPulse 2s infinite;
+}
+
+.status-indicator[data-status="online"] .status-dot {
+    background: #4CAF50;
+    box-shadow: 0 0 8px #4CAF50;
+}
+
+.status-indicator[data-status="offline"] .status-dot {
+    background: #f44336;
+}
+
+.status-indicator[data-status="away"] .status-dot {
+    background: #FFC107;
 }
 
 /* Authentication Form */
@@ -502,6 +591,12 @@ body {
 @keyframes bounce {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.2); }
+}
+
+@keyframes statusPulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
 /* Footer */

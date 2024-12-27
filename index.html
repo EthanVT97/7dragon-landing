@@ -108,18 +108,37 @@
 
     <!-- Chat Widget -->
     <div class="chat-widget" id="chatWidget">
-        <button class="chat-toggle" onclick="toggleChat()">
+        <button class="chat-toggle" onclick="toggleChat()" id="chatToggle">
             <i class="fas fa-comments"></i>
             <span class="my">ချက်တင်</span>
             <span class="en">Chat</span>
+            <span class="notification-badge" id="chatNotification">1</span>
+            <div class="status-indicator" id="supportStatus" data-status="offline">
+                <span class="status-dot"></span>
+                <span class="status-text">
+                    <span class="my">အော့ဖ်လိုင်း</span>
+                    <span class="en">Offline</span>
+                </span>
+            </div>
         </button>
+        
         <div class="chat-container" id="chatContainer">
             <div class="chat-header">
-                <h3>
-                    <span class="my">ဝန်ဆောင်မှု</span>
-                    <span class="en">Support</span>
-                </h3>
-                <button onclick="toggleChat()">×</button>
+                <div class="header-content">
+                    <img src="assets/7DBG.jpg" alt="7Dragon Support" class="chat-avatar">
+                    <div class="header-text">
+                        <h3>
+                            <span class="my">ဝန်ဆောင်မှု</span>
+                            <span class="en">Support</span>
+                        </h3>
+                        <div class="status-text">
+                            <span class="status-dot"></span>
+                            <span class="my">အော့ဖ်လိုင်း</span>
+                            <span class="en">Offline</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="toggleChat()" class="close-chat">×</button>
             </div>
             <div class="chat-messages" id="chatMessages"></div>
             <div class="chat-input">

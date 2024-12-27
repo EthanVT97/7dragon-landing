@@ -35,8 +35,211 @@ let chatState = {
     isAuthenticated: false,
     username: null,
     gameId: null,
-    gamePassword: null
+    gamePassword: null,
+    supportStatus: 'offline', // online, offline, or away
+    lastActivity: null
 };
+
+// Support Schedule (24-hour format, UTC+6:30)
+const supportHours = {
+    start: 9, // 9:00 AM
+    end: 21   // 9:00 PM
+};
+
+// Check if support is available based on current time
+function isSupportAvailable() {
+    const now = new Date();
+    const hour = now.getHours();
+    return hour >= supportHours.start && hour < supportHours.end;
+}
+
+// Update support status every minute
+setInterval(updateSupportStatus, 60000);
+
+function updateSupportStatus() {
+    const wasOnline = chatState.supportStatus === 'online';
+    chatState.supportStatus = isSupportAvailable() ? 'online' : 'offline';
+    
+    // Update status indicator
+    const statusIndicator = document.getElementById('supportStatus');
+    if (statusIndicator) {
+        statusIndicator.className = `status-indicator ${chatState.supportStatus}`;
+        statusIndicator.setAttribute('data-status', chatState.supportStatus);
+    }
+    
+    // Notify user if support status changes
+    if (wasOnline !== (chatState.supportStatus === 'online')) {
+        const statusMessage = {
+            online: {
+                my: "ဝန်ဆောင်မှု အွန်လိုင်းရောက်ရှိနေပါပြီ။ မည်သို့ကူညီပေးရမလဲ?",
+                en: "Support is now online. How can we help you?"
+            },
+            offline: {
+                my: "ဝန်ဆောင်မှု အော့ဖ်လိုင်းဖြစ်နေပါသည်။ နောက်မှ ပြန်လည်ဆက်သွယ်ပါ။",
+                en: "Support is now offline. Please try again later."
+            }
+        };
+        
+        if (chatInitialized) {
+            addMessage("bot", statusMessage[chatState.supportStatus]);
+        }
+    }
+}
+
+// Enhanced Admin Notification System
+class AdminNotification {
+    constructor() {
+        this.pendingNotifications = new Map();
+        this.retryCount = 0;
+        this.maxRetries = 3;
+        this.retryDelay = 5000; // 5 seconds
+    }
+    
+    async notify(type, data) {
+        const notificationId = Date.now().toString();
+        const notification = {
+            id: notificationId,
+            type,
+            data,
+            timestamp: new Date().toISOString(),
+            status: 'pending',
+            retries: 0
+        };
+        
+        this.pendingNotifications.set(notificationId, notification);
+        await this.sendNotification(notification);
+        return notificationId;
+    }
+    
+    async sendNotification(notification) {
+        try {
+            const response = await fetch('https://github.com/EthanVT97/chat18k/notifications', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    notification,
+                    clientInfo: {
+                        userAgent: navigator.userAgent,
+                        language: navigator.language,
+                        timestamp: new Date().toISOString(),
+                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                    }
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            this.handleNotificationSuccess(notification.id, result);
+            
+        } catch (error) {
+            console.error('Error sending notification:', error);
+            this.handleNotificationError(notification);
+        }
+    }
+    
+    handleNotificationSuccess(notificationId, result) {
+        const notification = this.pendingNotifications.get(notificationId);
+        if (notification) {
+            notification.status = 'sent';
+            notification.response = result;
+            this.pendingNotifications.delete(notificationId);
+            
+            // Update UI to show notification was sent
+            addMessage("bot", {
+                my: "Admin ထံသို့ အကြောင်းကြားပြီးပါပြီ။ အမြန်ဆုံး ပြန်လည်ဆက်သွယ်ပါမည်။",
+                en: "Admin has been notified. We'll contact you as soon as possible."
+            });
+        }
+    }
+    
+    handleNotificationError(notification) {
+        if (notification.retries < this.maxRetries) {
+            notification.retries++;
+            notification.status = 'retrying';
+            
+            // Exponential backoff
+            const delay = this.retryDelay * Math.pow(2, notification.retries - 1);
+            
+            setTimeout(() => {
+                this.sendNotification(notification);
+            }, delay);
+            
+        } else {
+            notification.status = 'failed';
+            this.pendingNotifications.delete(notification.id);
+            
+            // Update UI to show notification failed
+            addMessage("bot", {
+                my: "ဆက်သွယ်မှု မအောင်မြင်ပါ။ ကျေးဇူးပြု၍ ဤနံပါတ်သို့ တိုက်ရိုက်ဆက်သွယ်ပါ: +959123456789",
+                en: "Notification failed. Please contact us directly at: +959123456789"
+            });
+        }
+    }
+}
+
+const adminNotifier = new AdminNotification();
+
+// Enhanced notifyAdmin function
+async function notifyAdmin() {
+    const notificationData = {
+        type: "new_user_request",
+        source: window.location.href,
+        supportStatus: chatState.supportStatus,
+        userInfo: {
+            language: document.body.classList.contains('en') ? 'en' : 'my',
+            timestamp: new Date().toISOString(),
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        }
+    };
+    
+    // Show immediate feedback
+    addMessage("bot", {
+        my: "Admin ထံသို့ အကြောင်းကြားနေပါသည်...",
+        en: "Notifying admin..."
+    });
+    
+    // Add typing indicator
+    const typingIndicator = addTypingIndicator();
+    
+    try {
+        const notificationId = await adminNotifier.notify('new_user', notificationData);
+        
+        // Remove typing indicator
+        typingIndicator.remove();
+        
+        if (chatState.supportStatus === 'online') {
+            addMessage("bot", {
+                my: "ကျွန်ုပ်တို့၏ ဝန်ထမ်းများ အွန်လိုင်းရောက်ရှိနေပါသည်။ မကြာမီ ပြန်လည်ဆက်သွယ်ပါမည်။",
+                en: "Our support team is online and will assist you shortly."
+            });
+        } else {
+            addMessage("bot", {
+                my: `ယခု ဝန်ဆောင်မှု ${chatState.supportStatus === 'offline' ? 'အော့ဖ်လိုင်း' : 'ခဏခွာ'} ဖြစ်နေပါသည်။`,
+                en: `Support is currently ${chatState.supportStatus}. Operating hours: ${supportHours.start}:00 AM - ${supportHours.end}:00 PM (MMT)`
+            });
+        }
+        
+        // Add contact information
+        addMessage("bot", {
+            my: "သင့်အား ပိုမိုကောင်းမွန်စွာ ဝန်ဆောင်မှုပေးနိုင်ရန် ဤနေရာတွင် ဆက်သွယ်နိုင်ပါသည်: https://github.com/EthanVT97/chat18k",
+            en: "For immediate assistance, you can reach us at: https://github.com/EthanVT97/chat18k"
+        });
+        
+    } catch (error) {
+        console.error('Error in notifyAdmin:', error);
+        typingIndicator.remove();
+        
+        addMessage("bot", {
+            my: "ဆက်သွယ်မှု မအောင်မြင်ပါ။ ကျေးဇူးပြု၍ နောက်မှ ထပ်စမ်းကြည့်ပါ။",
+            en: "There was an issue notifying our team. Please try again later."
+        });
+    }
+}
 
 // Chat functionality
 let chatOpen = false;
@@ -132,37 +335,57 @@ async function authenticateUser() {
 }
 
 async function notifyAdmin() {
-    const adminNotification = {
+    const notificationData = {
         type: "new_user_request",
-        timestamp: new Date().toISOString(),
-        source: window.location.href
+        source: window.location.href,
+        supportStatus: chatState.supportStatus,
+        userInfo: {
+            language: document.body.classList.contains('en') ? 'en' : 'my',
+            timestamp: new Date().toISOString(),
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        }
     };
     
-    // Send notification to admin (replace with actual API call)
+    // Show immediate feedback
+    addMessage("bot", {
+        my: "Admin ထံသို့ အကြောင်းကြားနေပါသည်...",
+        en: "Notifying admin..."
+    });
+    
+    // Add typing indicator
+    const typingIndicator = addTypingIndicator();
+    
     try {
-        const response = await fetch('https://github.com/EthanVT97/chat18k', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(adminNotification)
-        });
+        const notificationId = await adminNotifier.notify('new_user', notificationData);
         
-        addMessage("bot", {
-            my: "Admin ထံသို့ အကြောင်းကြားပြီးပါပြီ။ ကျေးဇူးပြု၍ ခဏစောင့်ပါ။",
-            en: "We've notified our admin. Please wait for assistance."
-        });
+        // Remove typing indicator
+        typingIndicator.remove();
+        
+        if (chatState.supportStatus === 'online') {
+            addMessage("bot", {
+                my: "ကျွန်ုပ်တို့၏ ဝန်ထမ်းများ အွန်လိုင်းရောက်ရှိနေပါသည်။ မကြာမီ ပြန်လည်ဆက်သွယ်ပါမည်။",
+                en: "Our support team is online and will assist you shortly."
+            });
+        } else {
+            addMessage("bot", {
+                my: `ယခု ဝန်ဆောင်မှု ${chatState.supportStatus === 'offline' ? 'အော့ဖ်လိုင်း' : 'ခဏခွာ'} ဖြစ်နေပါသည်။`,
+                en: `Support is currently ${chatState.supportStatus}. Operating hours: ${supportHours.start}:00 AM - ${supportHours.end}:00 PM (MMT)`
+            });
+        }
         
         // Add contact information
         addMessage("bot", {
             my: "သင့်အား ပိုမိုကောင်းမွန်စွာ ဝန်ဆောင်မှုပေးနိုင်ရန် ဤနေရာတွင် ဆက်သွယ်နိုင်ပါသည်: https://github.com/EthanVT97/chat18k",
-            en: "For better assistance, you can reach us at: https://github.com/EthanVT97/chat18k"
+            en: "For immediate assistance, you can reach us at: https://github.com/EthanVT97/chat18k"
         });
+        
     } catch (error) {
-        console.error('Error notifying admin:', error);
+        console.error('Error in notifyAdmin:', error);
+        typingIndicator.remove();
+        
         addMessage("bot", {
-            my: "ဝန်ဆောင်မှုတွင် ပြဿနာရှိနေပါသည်။ နောက်မှ ထပ်စမ်းကြည့်ပါ။",
-            en: "There was an issue with the service. Please try again later."
+            my: "ဆက်သွယ်မှု မအောင်မြင်ပါ။ ကျေးဇူးပြု၍ နောက်မှ ထပ်စမ်းကြည့်ပါ။",
+            en: "There was an issue notifying our team. Please try again later."
         });
     }
 }
