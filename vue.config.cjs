@@ -1,4 +1,5 @@
 const { defineConfig } = require('@vue/cli-service')
+const CompressionPlugin = require('compression-webpack-plugin')
 
 module.exports = defineConfig({
   css: {
@@ -27,23 +28,59 @@ module.exports = defineConfig({
 
     // Optimize chunks
     config.optimization.splitChunks({
-      chunks: 'all',
       cacheGroups: {
-        vendors: {
-          name: 'vendors',
+        defaultVendors: {
+          name: 'chunk-vendors',
           test: /[\\/]node_modules[\\/]/,
-          priority: 10,
+          priority: -10,
           chunks: 'initial'
         },
         common: {
-          name: 'common',
+          name: 'chunk-common',
           minChunks: 2,
-          chunks: 'async',
-          priority: 5,
+          priority: -20,
+          chunks: 'initial',
           reuseExistingChunk: true
         }
       }
     })
+
+    // Add compression
+    if (process.env.NODE_ENV === 'production') {
+      config.plugin('compression').use(CompressionPlugin, [{
+        filename: '[path][base].gz',
+        algorithm: 'gzip',
+        test: /\.(js|css|html|svg)$/,
+        threshold: 10240,
+        minRatio: 0.8
+      }])
+    }
+
+    // Optimize images
+    config.module
+      .rule('images')
+      .use('image-webpack-loader')
+      .loader('image-webpack-loader')
+      .options({
+        bypassOnDebug: true,
+        mozjpeg: {
+          progressive: true,
+          quality: 65
+        },
+        optipng: {
+          enabled: false
+        },
+        pngquant: {
+          quality: [0.65, 0.90],
+          speed: 4
+        },
+        gifsicle: {
+          interlaced: false
+        },
+        webp: {
+          quality: 75
+        }
+      })
 
     // Optimize font awesome
     config.module

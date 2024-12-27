@@ -30,6 +30,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { createInitialAdmin } from '@/utils/createInitialAdmin.mjs'
+import { logger } from '@/utils/logger'
 
 export default {
   name: 'AdminSetup',
@@ -56,7 +57,7 @@ export default {
             }
           }
         } else if (success) {
-          console.log('Admin setup completed successfully')
+          logger.info('Admin setup completed')
           setupComplete.value = true
         } else {
           errorMessage.value = 'Failed to create admin user for an unknown reason'

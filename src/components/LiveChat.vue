@@ -158,6 +158,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use "sass:color";
+
 .live-chat {
   position: fixed;
   bottom: 20px;
@@ -169,7 +171,7 @@ export default {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, $primary, darken($primary, 15%));
+  background: linear-gradient(135deg, $primary, color.adjust($primary, $lightness: -15%));
   border: none;
   color: white;
   font-size: 24px;
@@ -211,7 +213,7 @@ export default {
 
 .chat-header {
   padding: 15px;
-  background: linear-gradient(135deg, $primary, darken($primary, 15%));
+  background: linear-gradient(135deg, $primary, color.adjust($primary, $lightness: -15%));
   color: white;
   
   h3 {

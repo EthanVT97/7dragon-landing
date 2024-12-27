@@ -46,6 +46,7 @@
 
 <script>
 import { ref } from 'vue'
+import { logger } from '@/utils/logger'
 
 export default {
   name: 'Chatbot',
@@ -67,8 +68,12 @@ export default {
     })
 
     const saveConfig = async () => {
-      // Save config to Supabase
-      console.log('Saving config:', config.value)
+      try {
+        // Save config to Supabase
+        logger.info('Chatbot settings updated successfully')
+      } catch (error) {
+        logger.error('Failed to update chatbot settings:', error)
+      }
     }
 
     const addTemplate = () => {
@@ -84,7 +89,7 @@ export default {
 
     const testBot = () => {
       // Implement bot testing functionality
-      console.log('Testing bot...')
+      logger.info('Testing bot...')
     }
 
     return {

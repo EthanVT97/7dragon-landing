@@ -98,13 +98,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use "sass:color";
+
 .login {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: $spacing-lg;
-  background: linear-gradient(135deg, $background, darken($background, 10%));
+  background: linear-gradient(135deg, $background, color.adjust($background, $lightness: -10%));
 }
 
 .login-container {

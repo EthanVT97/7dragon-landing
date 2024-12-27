@@ -414,6 +414,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use "sass:color";
+
 .admin-dashboard {
   padding: 24px;
   
@@ -624,7 +626,7 @@ export default {
     }
     
     &:hover {
-      background: darken($primary, 5%);
+      background: color.adjust($primary, $lightness: -5%);
     }
   }
   

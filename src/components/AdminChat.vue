@@ -365,6 +365,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use "sass:color";
+
 .admin-chat {
   display: flex;
   height: 100vh;
@@ -567,7 +569,7 @@ export default {
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background: #f1f1f1;
+        background: color.adjust(#f1f1f1, $lightness: -5%);
         cursor: pointer;
         
         input {
@@ -579,7 +581,7 @@ export default {
         }
         
         &:hover {
-          background: darken(#f1f1f1, 5%);
+          background: color.adjust(#f1f1f1, $lightness: -10%);
         }
       }
       
@@ -616,7 +618,7 @@ export default {
         }
         
         &:hover:not(:disabled) {
-          background: darken($primary, 5%);
+          background: color.adjust($primary, $lightness: -5%);
         }
       }
     }

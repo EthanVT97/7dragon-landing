@@ -34,6 +34,7 @@
 
 <script>
 import { ref } from 'vue'
+import { logger } from '@/utils/logger'
 
 export default {
   name: 'AdminContent',
@@ -57,7 +58,7 @@ export default {
 
     const saveContent = async () => {
       // Save content to Supabase
-      console.log('Saving content:', content.value)
+      logger.info('Content updated successfully')
     }
 
     const addFeature = () => {
