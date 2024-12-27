@@ -224,21 +224,23 @@ export default createStore({
     },
     
     async sendMessage({ commit, state }, content) {
+      let messageTimestamp = null;
       try {
         if (!state.isConnected) {
           throw new Error('Not connected to chat service')
         }
 
-        // Create message object
-        const message = {
+        // Create message object with timestamp
+        messageTimestamp = new Date()
+        const messageObj = {
           content,
-          timestamp: new Date(),
+          timestamp: messageTimestamp,
           isFromUser: true,
           status: 'sending'
         }
 
         // Add to local state
-        commit('ADD_MESSAGE', message)
+        commit('ADD_MESSAGE', messageObj)
 
         // Send to Supabase
         const { data, error } = await supabase
@@ -256,7 +258,7 @@ export default createStore({
 
         // Update message status
         commit('UPDATE_MESSAGE_STATUS', {
-          timestamp: message.timestamp,
+          timestamp: messageTimestamp,
           status: 'sent',
           id: data.id
         })
@@ -264,10 +266,12 @@ export default createStore({
         return { success: true }
       } catch (error) {
         console.error('Failed to send message:', error)
-        commit('UPDATE_MESSAGE_STATUS', {
-          timestamp: message.timestamp,
-          status: 'failed'
-        })
+        if (messageTimestamp) {
+          commit('UPDATE_MESSAGE_STATUS', {
+            timestamp: messageTimestamp,
+            status: 'failed'
+          })
+        }
         return { error }
       }
     },
